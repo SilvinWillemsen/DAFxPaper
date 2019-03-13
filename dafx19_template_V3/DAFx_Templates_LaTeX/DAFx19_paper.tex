@@ -187,35 +187,6 @@ example of a figure spanning two columns.
 As for figures, all tables should be centered on the column (or page, if the table spans both columns).
 Table captions should be in italic, precede each table and have the format given in Table \ref{tab:example}.
 
-\begin{table}[ht]
-  \caption{\itshape Basic trigonometric values.}
-	\centering
-	\begin{tabular}{|c|c|}
-		\hline
-		$\mathrm{angle}\,(\theta, \mathrm{rad})$ & $\sin \theta$ \\\hline
-		$\frac{\pi}{2}$ & $1$ \\
-		$\pi$ & $0$ \\
-		$\frac{3\pi}{2}$ & $-1$ \\
-		$2\pi$ & $0$ \\\hline
-	\end{tabular}
-	%
-	\label{tab:example}
-\end{table}
-
-\begin{table*}[ht]
-  \caption{{\it Basic trigonometric values, spanning two columns.}}
-	\centering
-  \begin{tabular}{|c|c|c|c|c|c|c|}\hline
-    $\mathrm{angle}\, (\theta, \mathrm{rad})$ & $\sin \theta$ & $\cos \theta $ & $(\sin \theta)/2 $ & $(\cos \theta) /2 $ & $(\sin \theta)/3 $ & $(\cos \theta)/3$    \\\hline
-    $\frac{\pi}{2}$ & $1$ & $0$ & $1/2$ & $0$ & $1/3$ & $0$ \\
-    $\pi$ & $0$ & $-1$ & $0$ & $-1/2$ & $0$ & $-1/3$\\
-    $\frac{3\pi}{2}$ & $-1$ & $0$ & $-1/2$ & $0$ & $-1/3$ & $0$ \\
-    $2\pi$ & $0$ & $1$ & $0$ & $1/2$ & $0$ & $1/3$ \\\hline
- \end{tabular}
-	%
-  \label{tab:example2}
-\end{table*}
-
 \subsection{Equations}
 Equations should be placed on separate lines and numbered:
 
@@ -245,68 +216,96 @@ The references will be numbered in order of appearance \cite{Mitra:Kaiser:1993:D
 The reference format is the standard IEEE one. We recommend to use BibTeX to create the reference list.
 
 \section{Stiff String}
-Using the a subscript $t$ and $x$ to denote a derivatives with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as
-\begin{equation}
+Using a subscript $t$ and $x$ to denote a derivative with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as
+\begin{equation}\label{eq:PDE}
     u_{tt} = c^2u_{xx}-\kappa^2u_{xxxx}-2\sigma_0u_t+2\sigma_1u_{txx},
 \end{equation}
-where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$), $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in $m^2/s$) with Young's Modulus $E$ (in Pa), moment of inertia $I
-
+where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$), $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in m$^2$/s) with Young's Modulus $E$ (in Pa) and area moment of inertia $I$ (in m$^4$) and frequency independent and frequency dependent damping coefficients $\sigma_0 \geq 0$ and $\sigma_1 \geq 0$.
+\section{Finite-Difference Schemes}
+Equation \eqref{eq:PDE} can be discretised at times $t = nk$, with sample $n \in \mathbb{N}$ and time-step $k = 1 / f_\text{s}$ with sample-rate $f_\text{s}$ and locations $x = lh$, with grid points $l \in [0,N]$, where $N + 1$ is the total number of grid points and grid spacing $h$ which is calculated using 
+\begin{equation}
+    h \geq h_\text{min} = \sqrt{\frac{c^2k^2+ + \sigma_1k\sqrt{(c^2k^2+4\sigma_1k)^2+16\kappa^2k^2}}{2}}.
+\end{equation}
+Approximations for the derivatives in the equations found in \ref{eq:PDE} are described in the following way: 
+\begin{subequations}\label{eq:approximations}
+    \begin{align}
+        \label{eq:secondSpacex}
+        u_{xx} &\approx \delta_{xx}u_l^n = \frac{1}{h^2}\big(u_{l+1}^n - 2u_l^n + u_{l-1}^n\big),\\
+        % \label{eq:secondSpacey}\delta_{yy}u_l^n &= \frac{1}{h^2}\big(u_{m+1}^n - 2u_m^n + u_{m-1}^n\big),\\
+        %  \label{eq:fourthSpace}\delta_xxxx &= \frac{1}{h^4}\big(u_{l+2}^n - 4u_{l+1}^2 + 6 u_{l}^n - 4u_{l-1}^n + u_{l-2}^n\big),\\
+        \label{eq:centerTime}
+        u_{t} &\approx \delta_{t\cdot} u^n_l = \frac{1}{2k}\big(u_l^{n+1}-u_l^{n-1}\big),\\
+        \label{eq:secondTime}
+        u_{tt} &\approx \delta_{tt}u_l^n = \frac{1}{k^2} \big(u_l^{n+1} - 2u_l^n + u_l^{n-1}\big),\\
+        u_{txx} &\approx 
+        \begin{aligned}[t]\delta_{t-}\delta_{xx} =& \; \frac{1}{hk^2}\big(u_{l+1}^n - 2u_l^2 + u_{l-1}^n \\
+        &- u_{l+1}^{n-1} + 2u_l^{n-1} - u_{l-1}^{n-1}\big),
+        \end{aligned}
+    \end{align}
+\end{subequations}
+Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:PDE}
+\begin{equation}
+    \delta_{tt}u_l^n = c^2\delta_{xx}u_l^n-\kappa^2\delta_{xxxx}u_l^n-2\sigma_0\delta_t u_l^n + 2\sigma_1 \delta_{txx}u_l^n
+\end{equation}
+adding onto this
 \section{Elasto-Plastic Bow model}
 
 At the bowing point $l=x_\text{B}$, the FDS for the bowed string looks like:
 \begin{equation}
     \begin{aligned}
     \label{eq:FDS}
-        \delta_{tt} u_l^n = &\ c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0\delta_{t\cdot} u_l^n
+        \delta_{tt} u_l^n = &\: c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0\delta_{t\cdot} u_l^n
         \\ 
-        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v_\text{rel}, z),
+        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z),
     \end{aligned}
 \end{equation}
-where we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v_\text{rel}$ and the mean bristle displacement $z$ of the bow.
+where we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
 The excitation (or bowing) function is defined as
 \begin{equation}
-    f(v_\text{rel}, z) = s_0z + s_1\dot z + s_2v_\text{rel}
+    f(v, z) = s_0z + s_1\dot z + s_2v
 \end{equation}
 where 
 \begin{equation}\label{eq:zdot}
-    \dot z(v_\text{rel}, z) = v_\text{rel}\bigg[1-\alpha(v_\text{rel}, z)\frac{z}{z_\text{ss}(v_\text{rel})}\bigg]
+    \dot z(v, z) = v\bigg[1-\alpha(v, z)\frac{z}{z_\text{ss}(v)}\bigg]
 \end{equation}
 with adhesion map
 \begin{equation}
-\alpha(v_\text{rel}, z) 
+\alpha(v, z) 
     \begin{cases}
     \begin{rcases}
         &0 & |z| < z_\text{ba}\\
-       &\alpha_\text{m}(v_\text{rel},z)&\  z_\text{ba}<|z|<z_\text{ss}(v_\text{rel})\\
-        &1 &|z|>z_\text{ss}(v_\text{rel})
-        \end{rcases}\text{if}\  \sgn(v_\text{rel})=\sgn(z)\\
-        0\hspace{120pt}\text{if}\  \sgn(v_\text{rel})\neq\sgn(z),
+       &\alpha_\text{m}(v,z)&\  z_\text{ba}<|z|<z_\text{ss}(v)\\
+        &1 &|z|>z_\text{ss}(v)
+        \end{rcases}\text{if}\  \sgn(v)=\sgn(z)\\
+        0\hspace{107pt}\text{if}\  \sgn(v)\neq\sgn(z),
     \end{cases}
 \end{equation}
 the transition between the elastic and plastic behaviour
 \begin{equation}
-    \alpha_\text{m} = \frac{1}{2}\bigg[1+\sin\bigg(\pi\frac{z-\frac{1}{2}(z_\text{ss}(v_\text{rel})+z_\text{ba})}{z_\text{ss}(v_\text{rel})-z_\text{ba}}\bigg)\bigg],
+    \alpha_\text{m} = \frac{1}{2}\bigg[1+\sin\bigg(\pi\frac{z-\frac{1}{2}(z_\text{ss}(v)+z_\text{ba})}{z_\text{ss}(v)-z_\text{ba}}\bigg)\bigg],
 \end{equation}
 and the steady-state function
 \begin{equation}
-    z_\text{ss} = \frac{\sgn(v_\text{rel})}{s_0}\Big[f_\text{c}+(f_\text{s}-f_\text{c})e^{-(v_\text{rel}/v_\text{s})^2}\Big].
+    z_\text{ss} = \frac{\sgn(v)}{s_0}\Big[f_\text{c}+(f_\text{s}-f_\text{c})e^{-(v/v_\text{s})^2}\Big].
 \end{equation}
 We can solve \eqref{eq:FDS} this we can use the following identities
 \begin{equation}
-    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big) \quad \text{ and } \quad \delta_{t\cdot}u_l^n = v_\text{rel} + v_\text{B},
+    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big) \quad \text{ and } \quad \delta_{t\cdot}u_l^n = v + v_\text{B},
 \end{equation}
 resulting in 
 
 \begin{equation}
 \label{eq:stiffStringFDS}
-\frac{2}{k}v_\text{rel} + \frac{2}{k}v_\text{B} - \delta_{t-}u_l^n =c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0v_\text{rel} - 2\sigma_0v_\text{B}
-+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v_\text{rel}, z).
+\frac{2}{k}v + \frac{2}{k}v_\text{B} - \delta_{t-}u_l^n =c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0v - 2\sigma_0v_\text{B}
++ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z).
 \end{equation}
 This can be rewritten to
 \begin{align}\label{eq:newtonFunction}
-    &s_0z+s_1\dot z+s_2v_\text{rel} + \frac{2}{k}v_\text{rel} + 2\sigma_0v_\text{rel} + b = 0 \quad \text{where} \\
-    & b = \frac{2}{k}v_\text{B}-\frac{2}{k}\delta_{t-}u_l^n - c^2 \delta_{xx} u_l^n +\kappa^2\delta_{xxxx} u_l^n + 2\sigma_0v_\text{B}
+    &s_0z+s_1\dot z+s_2v + \frac{2}{k}v + 2\sigma_0v + b = 0 \quad \text{where} \\
+    & \begin{aligned}b =& \: \frac{2}{k}v_\text{B}-\frac{2}{k}\delta_{t-}u_l^n - c^2 \delta_{xx} u_l^n +\kappa^2\delta_{xxxx} u_l^n \\
+    &+ 2\sigma_0v_\text{B}
 - 2\sigma_1\delta_{t-}\delta_{xx}u_l^n,
+\end{aligned}
 \end{align}
 where $b$ can be pre-computed.
 
@@ -317,20 +316,20 @@ Newton's method (or Newton-Raphson) is defined as
 where $g(x)$ is an arbitrary function dependent on to-be-calculated variable $x$.
 In this case, $g$ is \eqref{eq:zdot} $x=\dot z$
 \begin{equation}
-    \dot z^{i+1} = \dot z^i - \frac{\dot z(v_\text{rel}, z)}{\dot z'(v_\text{rel},z)}
+    \dot z^{i+1} = \dot z^i - \frac{\dot z(v, z)}{\dot z'(v,z)}
 \end{equation}
 where
 \begin{equation}
-    \dot z'(v_\text{rel}, z) = \frac{d\dot z}{dv_\text{rel}} + \frac{d\dot z}{dz},
+    \dot z'(v, z) = \frac{d\dot z}{dv} + \frac{d\dot z}{dz},
 \end{equation}
-i.e. the derivative of $\dot z$ with respect to the relative velocity $v_\text{rel}$ plus the derivative of $\dot z$ with respect to the average displacement $z$.
+i.e. the derivative of $\dot z$ with respect to the relative velocity $v$ plus the derivative of $\dot z$ with respect to the average displacement $z$.
 In the iteration, we use the newly calculated value for $\dot z$ and the value of $z$ at the previous time step to calculate an estimate of $z$ using
 \begin{equation}
     z^n = k\dot z^{i+1} -z^{n-1}.
 \end{equation}
-Inserting this into \eqref{eq:newtonFunction} we can caluclate $v_\text{rel}$ using
+Inserting this into \eqref{eq:newtonFunction} we can caluclate $v$ using
 \begin{equation}
-    v_\text{rel} = \frac{-s_0z-s_1\dot z-b}{s_2 + \frac{2}{k} + 2\sigma_0}.
+    v = \frac{-s_0z-s_1\dot z-b}{s_2 + \frac{2}{k} + 2\sigma_0}.
 \end{equation}
 
 \section{Conclusions}
