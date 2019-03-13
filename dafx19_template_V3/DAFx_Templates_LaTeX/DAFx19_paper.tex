@@ -171,16 +171,16 @@ If bitmap figures are used, please make sure that the resolution is
 enough for print quality. Fig. \ref{ftt_plot2} illustrates an
 example of a figure spanning two columns.
 %
-\begin{figure}[ht]
-\centerline{\includegraphics[scale=0.8]{fft_plot2}}
-\caption{\label{fft_plot}{\it Sinusoid in time and frequency domain. Short captions are centered, long captions (more than 1 line) are justified.}}
-\end{figure}
-%
-\begin{figure*}[ht]
-\center
-\includegraphics[width=5in]{TwoColumnSine2}
-\caption{\label{ftt_plot2}{\it A figure spanning two columns, as mentioned in Sec. \ref{ssec:figures}. }}
-\end{figure*}
+% \begin{figure}[ht]
+% \centerline{\includegraphics[scale=0.8]{fft_plot2}}
+% \caption{\label{fft_plot}{\it Sinusoid in time and frequency domain. Short captions are centered, long captions (more than 1 line) are justified.}}
+% \end{figure}
+% %
+% \begin{figure*}[ht]
+% \center
+% \includegraphics[width=5in]{TwoColumnSine2}
+% \caption{\label{ftt_plot2}{\it A figure spanning two columns, as mentioned in Sec. \ref{ssec:figures}. }}
+% \end{figure*}
 
 
 \subsection{Tables}
@@ -221,6 +221,19 @@ Using a subscript $t$ and $x$ to denote a derivative with respect to time and sp
     u_{tt} = c^2u_{xx}-\kappa^2u_{xxxx}-2\sigma_0u_t+2\sigma_1u_{txx},
 \end{equation}
 where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$), $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in m$^2$/s) with Young's Modulus $E$ (in Pa) and area moment of inertia $I$ (in m$^4$) and frequency independent and frequency dependent damping coefficients $\sigma_0 \geq 0$ and $\sigma_1 \geq 0$.
+\section{Elasto-Plastic Bow Model}
+As opposed to less complex bow models, such as the hyperbolic [source] and exponential [source] models, the elasto-plastic assumes that the friction between the bow and the string is caused by a large quantity of bristles, each of which contributes to the total amount of friction. The bristles are assumed to be stiff springs with damping that can 'break' after a given break-away displacement.  In the model, the average bristle displacement $z$ is used. An extra term can be added to \eqref{eq:PDE} to include the bowing interaction
+\begin{equation}
+    \begin{aligned}
+    \label{eq:FDS}
+        u_{tt} = \hdots - f(v, z),
+    \end{aligned}
+\end{equation}
+where function $f$ describes the bowing force acting on the scheme and is dependent on the relative velocity between the string and the bow at bowing point $x_\text{B}$
+\begin{equation}
+  v = u_t(x_\text{B}) - v_\text{B}
+\end{equation}
+and 
 \section{Finite-Difference Schemes}
 Equation \eqref{eq:PDE} can be discretised at times $t = nk$, with sample $n \in \mathbb{N}$ and time-step $k = 1 / f_\text{s}$ with sample-rate $f_\text{s}$ and locations $x = lh$, with grid points $l \in [0,N]$, where $N + 1$ is the total number of grid points and grid spacing $h$ which is calculated using 
 \begin{equation}
@@ -238,14 +251,17 @@ Approximations for the derivatives in the equations found in \ref{eq:PDE} are de
         \label{eq:secondTime}
         u_{tt} &\approx \delta_{tt}u_l^n = \frac{1}{k^2} \big(u_l^{n+1} - 2u_l^n + u_l^{n-1}\big),\\
         u_{txx} &\approx 
-        \begin{aligned}[t]\delta_{t-}\delta_{xx} =& \; \frac{1}{hk^2}\big(u_{l+1}^n - 2u_l^2 + u_{l-1}^n \\
+        \begin{aligned}[t]\delta_{t-}\delta_{xx}u_l^n =& \; \frac{1}{hk^2}\big(u_{l+1}^n - 2u_l^2 + u_{l-1}^n \\
         &- u_{l+1}^{n-1} + 2u_l^{n-1} - u_{l-1}^{n-1}\big),
         \end{aligned}
     \end{align}
 \end{subequations}
 Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:PDE}
 \begin{equation}
-    \delta_{tt}u_l^n = c^2\delta_{xx}u_l^n-\kappa^2\delta_{xxxx}u_l^n-2\sigma_0\delta_t u_l^n + 2\sigma_1 \delta_{txx}u_l^n
+  \begin{aligned}
+    \delta_{tt}u_l^n =& \; c^2\delta_{xx}u_l^n-\kappa^2\delta_{xxxx}u_l^n-2\sigma_0\delta_t u_l^n \\
+    &+ 2\sigma_1 \delta_t\delta_{xx}u_l^n
+  \end{aligned}
 \end{equation}
 adding onto this
 \section{Elasto-Plastic Bow model}
