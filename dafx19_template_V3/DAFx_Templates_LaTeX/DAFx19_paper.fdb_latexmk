@@ -1,15 +1,15 @@
 # Fdb version 3
-["bibtex DAFx19_paper"] 1552554682 "DAFx19_paper.aux" "DAFx19_paper.bbl" "DAFx19_paper" 1552554683
+["bibtex DAFx19_paper"] 1552555968 "DAFx19_paper.aux" "DAFx19_paper.bbl" "DAFx19_paper" 1552555969
   "./IEEEbib.bst" 1552470468 17903 9ff833f4bf67f47893e44ee17b52d211 ""
-  "DAFx19_paper.aux" 1552554682 3982 1685b7ad3b029a83c88894c6fb924e2a ""
+  "DAFx19_paper.aux" 1552555969 4367 56870635526e2c5e47186cb89ec2c40e ""
   "DAFx19_paper.bcf" 0 -1 0 ""
-  "DAFx19_tmpl.bib" 1552470468 2974 771ab0c6f2a2baa2623f8e89146c5268 ""
+  "DAFx19_tmpl.bib" 1552555843 3111 59a894c956765ec21257c2e5683db602 ""
   (generated)
   "DAFx19_paper.blg"
   "DAFx19_paper.bbl"
-["pdflatex"] 1552554682 "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.tex" "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.pdf" "DAFx19_paper" 1552554683
-  "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.aux" 1552554682 3982 1685b7ad3b029a83c88894c6fb924e2a ""
-  "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.tex" 1552554681 26731 5e82451e9770f4419ed51fc71a15e272 ""
+["pdflatex"] 1552555968 "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.tex" "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.pdf" "DAFx19_paper" 1552555969
+  "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.aux" 1552555969 4367 56870635526e2c5e47186cb89ec2c40e ""
+  "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.tex" 1552555967 26902 247f4aba31a34c0b839bb53f9c655e9e ""
   "/usr/local/texlive/2016/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2016/texmf-dist/fonts/map/fontname/texfonts.map" 1272929888 3287 e6b82fe08f5336d4d5ebc73fb1152e87 ""
   "/usr/local/texlive/2016/texmf-dist/fonts/tfm/adobe/courier/pcrr8r.tfm" 1136768653 1292 bd42be2f344128bff6d35d98474adfe3 ""
@@ -113,16 +113,16 @@
   "/usr/local/texlive/2016/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1478168725 1888048 f2c5faed5981a516f406b2ccc20bff71 ""
   "/usr/local/texlive/2016/texmf-var/web2c/pdftex/pdflatex.fmt" 1478168753 3873397 d7097b3ecb6d977e7d73acf1f03b0bec ""
   "/usr/local/texlive/2016/texmf.cnf" 1463979140 577 2938757e76f31531e65cc647e3507693 ""
-  "DAFx19_paper.aux" 1552554682 3982 1685b7ad3b029a83c88894c6fb924e2a ""
-  "DAFx19_paper.bbl" 1552554682 2301 6a7465317c6f7af872ea64df7dd06146 "bibtex DAFx19_paper"
-  "DAFx19_paper.out" 1552554682 867 8ed10eb3329ab16bf4c0b734780f2ba5 ""
-  "DAFx19_paper.tex" 1552554681 26731 5e82451e9770f4419ed51fc71a15e272 ""
-  "alphaPlot.eps" 1552554625 169715 fc282fd962a82b7f81fddda09224a3ac ""
+  "DAFx19_paper.aux" 1552555969 4367 56870635526e2c5e47186cb89ec2c40e ""
+  "DAFx19_paper.bbl" 1552555968 2413 7a2e2d7693bee3c05170c7fba980e949 "bibtex DAFx19_paper"
+  "DAFx19_paper.out" 1552555969 867 8ed10eb3329ab16bf4c0b734780f2ba5 ""
+  "DAFx19_paper.tex" 1552555967 26902 247f4aba31a34c0b839bb53f9c655e9e ""
+  "alphaPlot.eps" 1552555906 169467 26be74da909584683e3fbbe3fc60e838 ""
   "dafx_19.sty" 1552470468 15489 66e11418bca315d076c26b643aefd511 ""
   (generated)
+  "DAFx19_paper.log"
   "DAFx19_paper.pdf"
   "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.log"
   "DAFx19_paper.aux"
-  "DAFx19_paper.log"
   "DAFx19_paper.out"
   "/Users/SilvinW/repositories/DAFxPaper/dafx19_template_V3/DAFx_Templates_LaTeX/DAFx19_paper.pdf"
