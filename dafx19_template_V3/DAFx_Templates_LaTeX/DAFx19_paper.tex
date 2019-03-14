@@ -221,15 +221,15 @@ where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), 
 As opposed to less complex bow models, such as the hyperbolic [source] and exponential [source] models, the elasto-plastic bow model assumes that the friction between the bow and the string is caused by a large quantity of bristles, each of which contributes to the total amount of friction. The bristles are assumed to be stiff springs with damping and can 'break' after a given break-away displacement. An extra term can be added to \eqref{eq:PDE} to include the bowing interaction
 \begin{equation}
     \begin{aligned}
-    \label{eq:FDS}
-        u_{tt} = \hdots - f(v, z),
+    \label{eq:bowingTerm}
+        u_{tt} = \hdots - \delta(x-x_\text{B})f(v, z),
     \end{aligned}
 \end{equation}
-where bowing function $f$ describes the input of the scheme and is dependent on the relative velocity between the string and the bow at bowing point $x_\text{B}$
+with spatial Dirac delta function $\delta(x-x_\text{B})$ applying the bowing function $f$ at bowing position $x_\text{B}$. The bowing function is dependent on the relative velocity between the string at the bowing point and the bow
 \begin{equation}
   v = u_t(x_\text{B}) - v_\text{B}
 \end{equation}
-and the aforementioned average bristle displacement $z$. The excitation (or bowing) function is defined as
+and the aforementioned average bristle displacement $z$. The bowing function is defined as
 \begin{equation}
     f(v, z) = s_0z + s_1\dot z + s_2v
 \end{equation}
@@ -243,7 +243,7 @@ where $z_\text{ss}$ is the steady-state function
 \begin{equation}
     z_\text{ss} = \frac{\sgn(v)}{s_0}\Big[f_\text{c}+(f_\text{s}-f_\text{c})e^{-(v/v_\text{s})^2}\Big].
 \end{equation}
-with stribeck velocity $v_\text{s}$ (in m/s) coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. 
+with stribeck velocity $v_\text{s}$ (in m/s), coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. 
 Furthermore, the adhesion map between the bow and the string is defined as
 \begin{equation}\label{eq:adhesionMap}
 \alpha(v, z) 
@@ -275,40 +275,59 @@ The closer $h$ is to $h_\text{min}$, the more accurate the scheme will be.
 Approximations for the derivatives in the equations found in \ref{eq:PDE} are described in the following way: 
 \begin{subequations}\label{eq:approximations}
     \begin{align}
-        \label{eq:secondSpacex}
-        u_{xx} &\approx \delta_{xx}u_l^n = \frac{1}{h^2}\big(u_{l+1}^n - 2u_l^n + u_{l-1}^n\big),\\
         % \label{eq:secondSpacey}\delta_{yy}u_l^n &= \frac{1}{h^2}\big(u_{m+1}^n - 2u_m^n + u_{m-1}^n\big),\\
         %  \label{eq:fourthSpace}\delta_xxxx &= \frac{1}{h^4}\big(u_{l+2}^n - 4u_{l+1}^2 + 6 u_{l}^n - 4u_{l-1}^n + u_{l-2}^n\big),\\
         \label{eq:centerTime}
         u_{t} &\approx \delta_{t\cdot} u^n_l = \frac{1}{2k}\big(u_l^{n+1}-u_l^{n-1}\big),\\
         \label{eq:secondTime}
         u_{tt} &\approx \delta_{tt}u_l^n = \frac{1}{k^2} \big(u_l^{n+1} - 2u_l^n + u_l^{n-1}\big),\\
+        \label{eq:secondSpacex}
+        u_{xx} &\approx \delta_{xx}u_l^n = \frac{1}{h^2}\big(u_{l+1}^n - 2u_l^n + u_{l-1}^n\big),\\
         u_{txx} &\approx 
         \begin{aligned}[t]\delta_{t-}\delta_{xx}u_l^n =& \; \frac{1}{hk^2}\big(u_{l+1}^n - 2u_l^2 + u_{l-1}^n \\
         &- u_{l+1}^{n-1} + 2u_l^{n-1} - u_{l-1}^{n-1}\big),
+        \end{aligned}\\
+        \label{eq:fourthSpacex}
+        u_{xxxx} &\approx\begin{aligned}[t] \delta_{xxxx}u_l^n = \frac{1}{h^4}\big(&u_{l+2}^n - 4u_{l+1}^n + 6u_l^n \\
+        &- 4u_{l-1}^n +u_{l-2}^n\big),
         \end{aligned}
     \end{align}
 \end{subequations}
-Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:PDE}
+Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:bowingTerm} at bowing point $x_\text{B}$
 \begin{equation}
   \begin{aligned}
-    \delta_{tt}u_l^n =& \; c^2\delta_{xx}u_l^n-\kappa^2\delta_{xxxx}u_l^n-2\sigma_0\delta_t u_l^n \\
-    &+ 2\sigma_1 \delta_t\delta_{xx}u_l^n
-  \end{aligned}
-\end{equation}
-adding onto this
-
-At the bowing point $l=x_\text{B}$, the FDS for the bowed string looks like:
-\begin{equation}
-    \begin{aligned}
     \label{eq:FDS}
         \delta_{tt} u_l^n = &\: c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0\delta_{t\cdot} u_l^n
         \\ 
-        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z),
+        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - J(x_\text{B})f(v, z).
     \end{aligned}
 \end{equation}
-where we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
+where $J$ is a spreading operator, applying the bowing function to bowing point $x_\text{B}$.
+We need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
+We can solve \eqref{eq:FDS} this we can use the following identities
+\begin{equation}
+    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big) \quad \text{ and } \quad \delta_{t\cdot}u_l^n = v + v_\text{B},
+\end{equation}
+resulting in 
 
+\begin{equation}
+\label{eq:stiffStringFDS}
+\begin{aligned}
+\frac{2}{k}v + \frac{2}{k}v_\text{B} - \delta_{t-}u_l^n =& \; c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0v \\
+&- 2\sigma_0v_\text{B}
++ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z).
+\end{aligned}
+\end{equation}
+
+This can be rewritten to
+\begin{align}\label{eq:newtonFunction}
+    &s_0z+s_1\dot z+s_2v + \frac{2}{k}v + 2\sigma_0v + b = 0 \quad \text{where} \\
+    & \begin{aligned}b =& \: \frac{2}{k}v_\text{B}-\frac{2}{k}\delta_{t-}u_l^n - c^2 \delta_{xx} u_l^n +\kappa^2\delta_{xxxx} u_l^n \\
+    &+ 2\sigma_0v_\text{B}
+- 2\sigma_1\delta_{t-}\delta_{xx}u_l^n,
+\end{aligned}
+\end{align}
+where $b$ can be pre-computed as its terms are not dependent on $v$ or $z$.
 Newton's method (or Newton-Raphson) is defined as
 \begin{equation}
     x^{i+1} = x^{i} - \frac{g(x^i)}{g'(x^i)}
@@ -327,8 +346,7 @@ where
 \begin{equation}
     g'(\dot z^i) = -0.2295\frac{dg(\dot z^i)}{dv} + k\frac{dg(\dot z^i)}{dz} - 1,
 \end{equation}
-i.e. the derivative of $\dot z$ with respect to the relative velocity $v$ plus the derivative of $\dot z$ with respect to the average displacement $z$.
-In the iteration, we use the newly calculated value for $\dot z$ and the value of $z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
+In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
 \begin{equation}
     z^n = z^{n-1} + \frac{k}{2}(\dot z^{i+1} + \dot z^{n-1}).
 \end{equation}
@@ -336,28 +354,6 @@ Inserting this into \eqref{eq:newtonFunction} we can caluclate $v$ using
 \begin{equation}
     v = \frac{-s_0z-s_1\dot z-b}{s_2 + \frac{2}{k} + 2\sigma_0}.
 \end{equation}
-We can solve \eqref{eq:FDS} this we can use the following identities
-\begin{equation}
-    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big) \quad \text{ and } \quad \delta_{t\cdot}u_l^n = v + v_\text{B},
-\end{equation}
-resulting in 
-
-\begin{equation}
-\label{eq:stiffStringFDS}
-\frac{2}{k}v + \frac{2}{k}v_\text{B} - \delta_{t-}u_l^n =c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0v - 2\sigma_0v_\text{B}
-+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z).
-\end{equation}
-
-This can be rewritten to
-\begin{align}\label{eq:newtonFunction}
-    &s_0z+s_1\dot z+s_2v + \frac{2}{k}v + 2\sigma_0v + b = 0 \quad \text{where} \\
-    & \begin{aligned}b =& \: \frac{2}{k}v_\text{B}-\frac{2}{k}\delta_{t-}u_l^n - c^2 \delta_{xx} u_l^n +\kappa^2\delta_{xxxx} u_l^n \\
-    &+ 2\sigma_0v_\text{B}
-- 2\sigma_1\delta_{t-}\delta_{xx}u_l^n,
-\end{aligned}
-\end{align}
-where $b$ can be pre-computed.
-
 
 \section{Conclusions}
 This template can be found on the conference website.
