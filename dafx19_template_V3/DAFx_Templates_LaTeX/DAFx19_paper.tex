@@ -138,7 +138,7 @@
 \begin{document}
 % more pdf-tex settings:
 \ifpdf % used graphic file format for pdflatex
-  \DeclareGraphicsExtensions{.png,.jpg,.pdf, .eps}
+  \DeclareGraphicsExtensions{.png,.jpg,.pdf, .eps} 
 \else  % used graphic file format for latex
   \DeclareGraphicsExtensions{.eps}
 \fi
@@ -173,7 +173,7 @@ example of a figure spanning two columns.
 %
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{alphaPlot}}
-\caption{\label{fft_plot}{\it A plot of the adhesion map $\alpha(v,z)$.}}
+\caption{\label{fft_plot}{\it A plot of the adhesion map $\alpha(v,z)$ when the signs of $v$ and $z$ are the same. The different regions are shown with the colours}}
 \end{figure}
 % %
 % \begin{figure*}[ht]
@@ -216,7 +216,7 @@ The references will be numbered in order of appearance \cite{Mitra:Kaiser:1993:D
 The reference format is the standard IEEE one. We recommend to use BibTeX to create the reference list.
 
 \section{Stiff String}
-Using the subscripts $t$ and $x$ to denote a single derivative with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as
+Using the subscripts $t$ and $x$ to denote a single derivative with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as \cite{Bilbao2009}
 \begin{equation}\label{eq:PDE}
     u_{tt} = c^2u_{xx}-\kappa^2u_{xxxx}-2\sigma_0u_t+2\sigma_1u_{txx},
 \end{equation}
@@ -249,13 +249,12 @@ where $z_\text{ss}$ is the steady-state function
 \end{equation}
 with stribeck velocity $v_\text{s}$ (in m/s) coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. 
 Furthermore, the adhesion map between the bow and the string is defined as
-\begin{equation}
+\begin{equation}\label{eq:adhesionMap}
 \alpha(v, z) 
     \begin{cases}
     \begin{rcases}
         &0 & |z| < z_\text{ba}\\
-       &\alpha_\text{m}(v,z)&\ \, z_\text{ba}<|z|<z_\text{ss}(v)\\
-        &1 &|z|>z_\text{ss}(v)
+       &\alpha_\text{m}(v,z)&\ \, z_\text{ba}<|z|<z_\text{ss}(v)\\        &1 &|z|>z_\text{ss}(v)
         \end{rcases}\text{if}\  \sgn(v)=\sgn(z)\\
         0\hspace{107pt}\text{if}\  \sgn(v)\neq\sgn(z),
     \end{cases}
