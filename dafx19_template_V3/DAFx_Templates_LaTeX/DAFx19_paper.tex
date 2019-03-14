@@ -138,7 +138,7 @@
 \begin{document}
 % more pdf-tex settings:
 \ifpdf % used graphic file format for pdflatex
-  \DeclareGraphicsExtensions{.png,.jpg,.pdf}
+  \DeclareGraphicsExtensions{.png,.jpg,.pdf, .eps}
 \else  % used graphic file format for latex
   \DeclareGraphicsExtensions{.eps}
 \fi
@@ -171,10 +171,10 @@ If bitmap figures are used, please make sure that the resolution is
 enough for print quality. Fig. \ref{ftt_plot2} illustrates an
 example of a figure spanning two columns.
 %
-% \begin{figure}[ht]
-% \centerline{\includegraphics[scale=0.8]{fft_plot2}}
-% \caption{\label{fft_plot}{\it Sinusoid in time and frequency domain. Short captions are centered, long captions (more than 1 line) are justified.}}
-% \end{figure}
+\begin{figure}[ht]
+\centerline{\includegraphics[width=1.0\columnwidth]{alphaPlot}}
+\caption{\label{fft_plot}{\it Sinusoid in time and frequency domain. Short captions are centered, long captions (more than 1 line) are justified.}}
+\end{figure}
 % %
 % \begin{figure*}[ht]
 % \center
