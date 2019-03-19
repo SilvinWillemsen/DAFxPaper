@@ -36,6 +36,7 @@
 \def\papertitle{Real-Time Implementation of the Elasto-Plastic Bow Model applied to Finite-Difference Schemes}
 \def\paperauthorA{Silvin Willemsen}
 \def\paperauthorB{Stefania Serafin}
+\def\paperauthorC{Stefan Bilbao}
 
 % Authors' affiliations have to be set below
 
@@ -105,22 +106,23 @@
 
 %---------------TWO-AUTHOR HEADER STARTS (uncomment below if your paper has two authors)-----------------------
 \twoaffiliations{
-\paperauthorA}
+\paperauthorA, \paperauthorB}
 {{Multisensory Experience Lab, CREATE,} \\ Aalborg University Copenhagen\\
-  Copenhagen, Denmark\\ {\tt \href{mailto:sil@create.aau.dk}{sil@create.aau.dk}}}
-{\paperauthorB}
-{{Multisensory Experience Lab, CREATE,} \\ Aalborg University Copenhagen\\
-  Copenhagen, Denmark\\ {\tt \href{mailto:sts@create.aau.dk}{sts@create.aau.dk}}}
+  Copenhagen, Denmark\\ {\tt \href{mailto:sil@create.aau.dk}{\{sil, sts\}@create.aau.dk}}}
+{\paperauthorC}
+{ Acoustics and Audio Group \\ University of Edinburgh\\
+    Edinburgh, UK\\
+     {\tt \href{mailto:s.bilbao@ed.ac.uk}{s.bilbao@ed.ac.uk}}}
 %-------------------------------------TWO-AUTHOR HEADER ENDS------------------------------------------------------
 
 %---------------THREE-AUTHOR HEADER STARTS (uncomment below if your paper has three authors)-----------------------
-%\threeaffiliations{
-%\paperauthorA \,\sthanks{This work was supported by the XYZ Foundation}}
-%{\href{http://dafx2019.bcu.ac.uk/}{Digital Media Technology Lab} \\ Birmingham City University \\ Birmingham, UK \\ {\tt \href{mailto:dafx2019@gmail.com}{dafx2019@gmail.com}}}
-%{\paperauthorB \,\sthanks{Thanks to the predecessors for the templates}}
-%{\href{http://dafx2018.web.ua.pt/}{IEETA} \\ University of Aveiro \\ Aveiro, Portugal \\ {\tt \href{mailto:dafx2018_papers@ua.pt}{dafx2018\_papers@ua.pt}}}
-%{\paperauthorC \,\sthanks{Illustrious contributor}}
-%{\href{http://www.acoustics.ed.ac.uk}{Acoustics and Audio Group,} \\ University of Edinburgh\\ Edinburgh, UK\\ {\tt \href{mailto:dafx17@ed.ac.uk}{dafx17@ed.ac.uk}}}
+% \threeaffiliations{
+% \paperauthorA \,\sthanks{This work was supported by the XYZ Foundation}}
+% {\href{http://dafx2019.bcu.ac.uk/}{Digital Media Technology Lab} \\ Birmingham City University \\ Birmingham, UK \\ {\tt \href{mailto:dafx2019@gmail.com}{dafx2019@gmail.com}}}
+% {\paperauthorB \,\sthanks{Thanks to the predecessors for the templates}}
+% {\href{http://dafx2018.web.ua.pt/}{IEETA} \\ University of Aveiro \\ Aveiro, Portugal \\ {\tt \href{mailto:dafx2018_papers@ua.pt}{dafx2018\_papers@ua.pt}}}
+% {\paperauthorC \,\sthanks{Illustrious contributor}}
+% {\href{http://www.acoustics.ed.ac.uk}{Acoustics and Audio Group,} \\ University of Edinburgh\\ Edinburgh, UK\\ {\tt \href{mailto:dafx17@ed.ac.uk}{dafx17@ed.ac.uk}}}
 %-------------------------------------THREE-AUTHOR HEADER ENDS------------------------------------------------------
 
 %----------------FOUR-AUTHOR HEADER STARTS (uncomment below if your paper has four authors)-----------------------
@@ -330,9 +332,9 @@ This can be rewritten to
 where $b$ can be pre-computed as its terms are not dependent on $v$ or $z$.
 Newton's method (or Newton-Raphson) is defined as
 \begin{equation}
-    x^{i+1} = x^{i} - \frac{g(x^i)}{g'(x^i)}
+    x^{i+1} = x^{i} - \frac{g(x^i)}{g'(x^i)} \quad \text{while} \quad |x^{i+1}-x^i| > \epsilon
 \end{equation}
-where $g(x)$ is an arbitrary function dependent on to-be-calculated variable $x$.
+where $g(x)$ is an arbitrary function dependent on to-be-calculated variable $x$ at iteration index $i$. The calculation is done until the difference between the unknown variable at the next iteration and the current iteration is smaller than a threshold $\epsilon$.
 
 As we need to find the roots of \eqref{eq:zdot}, $g$ with $x=\dot z$ is defined as
 \begin{equation}
@@ -344,7 +346,7 @@ and
 \end{equation}
 where
 \begin{equation}
-    g'(\dot z^i) = -0.2295\frac{dg(\dot z^i)}{dv} + k\frac{dg(\dot z^i)}{dz} - 1,
+    g'(\dot z^i) = -\frac{s_1}{s_2+\frac{2}{k} + 2\sigma_0}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
 \end{equation}
 In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
 \begin{equation}
