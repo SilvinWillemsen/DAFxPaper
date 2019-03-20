@@ -42,6 +42,8 @@
 
 %------------------------------------------------------------------------------------------
 \documentclass[twoside,a4paper]{article}
+\usepackage{tikz}
+\tikzset{>=latex}
 \usepackage{dafx_19}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{euscript}
@@ -83,7 +85,7 @@
     pdfstartview=XYZ % start with zoom=100% instead of full screen; especially useful if working with a big screen :-)
   ]{hyperref}
   \pdfcompresslevel=9
-  \usepackage[pdftex]{graphicx}
+%   \usepackage[pdftex]{graphicx}
 %  \usepackage[figure,table,hypcap=true]{caption}
 \else % compiling with latex
   \usepackage[dvips]{epsfig,graphicx}
@@ -157,6 +159,20 @@ The templates are available in electronic form on \href{http://dafx2019.bcu.ac.u
 
 \section{Introduction}
 \label{sec:intro}
+\begin{center}
+\begin{tikzpicture}
+    % \draw[dashed] (-10 0) -- (10 0)
+     \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](I) at (2.5, 9) {};
+    \foreach \id in {1,...,4}
+    {
+        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](a\id) at (\id, 10) {};
+        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](b\id) at (\id, 9.5) {};
+        \draw [-] (a\id) edge (b\id);
+        \draw [->] (b\id) edge (I);
+    }
+
+\end{tikzpicture}    
+\end{center}
 Bow models:
 
 The elasto-plastic 
