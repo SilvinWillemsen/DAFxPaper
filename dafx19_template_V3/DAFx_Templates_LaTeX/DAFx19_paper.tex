@@ -157,62 +157,9 @@ The templates are available in electronic form on \href{http://dafx2019.bcu.ac.u
 
 \section{Introduction}
 \label{sec:intro}
-This template can be found on the conference website.
+Bow models:
 
-\subsection{Figures}
-\label{ssec:figures}
-All figures should be centred on the column (or page, if the figure spans both columns).
-Figure captions (in italic) should follow each figure and have the format given in Figure \ref{fft_plot}.
-%
-Vectorial figures are preferred. For example when using
-\texttt{Matlab}, export using either Postscript or PDF format. Also,
-in order to provide a better readability, figure text font size
-should be at least identical to footnote font size. To do so using
-\texttt{Matlab}, use the \texttt{subplot} command before plotting.
-If bitmap figures are used, please make sure that the resolution is
-enough for print quality. Fig. \ref{ftt_plot2} illustrates an
-example of a figure spanning two columns.
-%
-% %
-% \begin{figure*}[ht]
-% \center
-% \includegraphics[width=5in]{TwoColumnSine2}
-% \caption{\label{ftt_plot2}{\it A figure spanning two columns, as mentioned in Sec. \ref{ssec:figures}. }}
-% \end{figure*}
-
-
-\subsection{Tables}
-As for figures, all tables should be centered on the column (or page, if the table spans both columns).
-Table captions should be in italic, precede each table and have the format given in Table \ref{tab:example}.
-
-\subsection{Equations}
-Equations should be placed on separate lines and numbered:
-
-\begin{equation}
-	X(e^{j\Omega})=\sum_{n=0}^{N-1}x(n)e^{-j\Omega n}
-	\label{eq1}
-	\end{equation}
-	where the sequence $x(n)$ in equation (\ref{eq1}) is a windowed frame:
-	\begin{equation}
-	x(n)=s(n) w(n)
-	\label{eq2}
-\end{equation}
-%
-with a window function $w(n)$.
-
-
-\subsection{Page Numbers}
-Page numbers will be added to the document in the post-processing stage, so {\em please leave the numbering as is},
-that is, the first page will start at page DAFX-1 and the last page, at most, will have to be DAFX-8.
-
-
-\subsection{References}
-The references will be numbered in order of appearance \cite{Mitra:Kaiser:1993:DSP:handbook}, \cite{Haykin:1991:adaptive:filter}, \cite{Moorer:2000:AES:audio:millenium} and \cite{Nackaerts:2001:ICMC}. Please avoid listing references that do not appear in the text (we did the opposite in this template).
-
-
-\subsubsection{Reference Format}
-The reference format is the standard IEEE one. We recommend to use BibTeX to create the reference list.
-
+The elasto-plastic 
 \section{Stiff String}
 Using the subscripts $t$ and $x$ to denote a single derivative with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as \cite{Bilbao2009}
 \begin{equation}\label{eq:PDE}
@@ -228,11 +175,11 @@ As opposed to less complex bow models, such as the hyperbolic [source] and expon
     \end{aligned}
 \end{equation}
 with spatial Dirac delta function $\delta(x-x_\text{B})$ applying the bowing function $f$ at bowing position $x_\text{B}$. The bowing function is dependent on the relative velocity between the string at the bowing point and the bow
-\begin{equation}
+\begin{equation}\label{eq:relVel}
   v = u_t(x_\text{B}) - v_\text{B}
 \end{equation}
 and the aforementioned average bristle displacement $z$. The bowing function is defined as
-\begin{equation}
+\begin{equation}\label{eq:forceFunction}
     f(v, z) = s_0z + s_1\dot z + s_2v
 \end{equation}
 where $s_0$ is the bristle stiffness (in N/m), $s_1$ is the damping coefficient and $s_2$ 
@@ -263,12 +210,29 @@ where the transition between the elastic and plastic behaviour is defined as
 \end{equation}
 with break-away displacement $z_\text{ba}$, i.e. where the bristles start to break, as mentioned at the beginning of this section. A visualisation of the adhesion map can be found in Figure \ref{fig:alphaPlot}.
 
+\textbf{In order to get the symmetry seen Figure \ref{fig:alphaPlot}, these need to be the equations:}
+
+\begin{equation}\label{eq:adhesionMap}
+\alpha(v, z) 
+    \begin{cases}
+    \begin{rcases}
+        &0 & |z| < z_\text{ba}\\
+       &\alpha_\text{m}(v,z)&\ \, z_\text{ba}<|z|<|z_\text{ss}(v)|\\        &1 &|z|>|z_\text{ss}(v)|
+        \end{rcases}\text{if}\  \sgn(v)=\sgn(z)\\
+        0\hspace{107pt}\text{if}\  \sgn(v)\neq\sgn(z),
+    \end{cases}
+\end{equation}
+
+\begin{equation}
+    \alpha_\text{m} = \frac{1}{2}\bigg[1+\sgn(z)\sin\bigg(\pi\frac{z-\sgn(z)\frac{1}{2}(|z_\text{ss}(v)|+z_\text{ba})}{|z_\text{ss}(v)|-z_\text{ba}}\bigg)\bigg],
+\end{equation}
+
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{alphaPlot.eps}}
 \caption{\label{fig:alphaPlot}{\it A plot of the adhesion map $\alpha(v,z)$ plotted against $z$ when the signs of $v$ and $z$ are the same. The different regions of the map are shown with the coloured areas.}}
 \end{figure}
 
-\section{Discretisation}
+\section{Discretisation}\label{sec:discretisation}
 Equation \eqref{eq:PDE} can be discretised at times $t = nk$, with sample $n \in \mathbb{N}$ and time-step $k = 1 / f_\text{s}$ with sample-rate $f_\text{s}$ and locations $x = lh$, with grid points $l \in [0,N]$, where $N + 1$ is the total number of grid points and grid spacing $h$ which needs to abide the following condition 
 \begin{equation}
     h \geq h_\text{min} = \sqrt{\frac{c^2k^2+4 \sigma_1k+\sqrt{(c^2k^2+4\sigma_1k)^2+16\kappa^2k^2}}{2}}.
@@ -295,35 +259,39 @@ Approximations for the derivatives in the equations found in \ref{eq:PDE} are de
         \end{aligned}
     \end{align}
 \end{subequations}
-Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:bowingTerm} at bowing point $x_\text{B}$
+Using the discretised variable $u_l^n$ is $u(x,t)$ at the $n$th time step and the $l$th point on the string, and the approximations shown in \eqref{eq:approximations} we can discretise \eqref{eq:bowingTerm}
 \begin{equation}
   \begin{aligned}
     \label{eq:FDS}
         \delta_{tt} u_l^n = &\: c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0\delta_{t\cdot} u_l^n
         \\ 
-        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - J(x_\text{B})f(v, z).
+        &+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - J(x_\text{B}^n)f(v, z).
     \end{aligned}
 \end{equation}
-where $J$ is a spreading operator, applying the bowing function to bowing point $x_\text{B}$.
-We need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
-We can solve \eqref{eq:FDS} this we can use the following identities
+where
+and the discrete relative velocity is
+\begin{equation}\label{eq:discRelVel}
+v = I(x_\text{B}^n)\delta_{t\cdot}u_l^n -  v_\text{B}.
+\end{equation}
+where $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are an interpolator and a spreading function around time-variant bowing point $x_\text{B}^n$ (see Appendix \ref{app:interpol}).
+At the bowing point we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
+We can solve \eqref{eq:FDS} at $x_\text{B}^n$ using \eqref{eq:discRelVel} and identity
 \begin{equation}
-    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big) \quad \text{ and } \quad \delta_{t\cdot}u_l^n = v + v_\text{B},
+    \delta_{tt}u_l^n = \frac{2}{k}\big(\delta_{t\cdot}u_l^n-\delta_{t-}u_l^n\big),
 \end{equation}
 resulting in 
-
 \begin{equation}
 \label{eq:stiffStringFDS}
 \begin{aligned}
-\frac{2}{k}v + \frac{2}{k}v_\text{B} - \delta_{t-}u_l^n =& \; c^2 \delta_{xx} u_l^n -\kappa^2\delta_{xxxx} u_l^n - 2\sigma_0v \\
-&- 2\sigma_0v_\text{B}
-+ 2\sigma_1\delta_{t-}\delta_{xx}u_l^n - f(v, z).
+\frac{2}{k}v &+ \frac{2}{k}v_\text{B} - I(x_\text{B}^n) \delta_{t-}u_l^n = \; c^2 I(x_\text{B}^n)\delta_{xx} u_l^n \\
+&-\kappa^2I(x_\text{B}^n)\delta_{xxxx} u_l^n - 2\sigma_0v
+- 2\sigma_0v_\text{B}\\
+&+ 2\sigma_1I(x_\text{B}^n)\delta_{t-}\delta_{xx}u_l^n - J(x_\text{B}^n)f(v, z).
 \end{aligned}
 \end{equation}
-
-This can be rewritten to
+Recalling \eqref{eq:forceFunction}, this can be rewritten to
 \begin{align}\label{eq:newtonFunction}
-    &s_0z+s_1\dot z+s_2v + \frac{2}{k}v + 2\sigma_0v + b = 0 \quad \text{where} \\
+    &s_0z+s_1\dot z+(s_2 + \frac{2}{k} + 2\sigma_0)v + b = 0 \quad \text{where} \\
     & \begin{aligned}b =& \: \frac{2}{k}v_\text{B}-\frac{2}{k}\delta_{t-}u_l^n - c^2 \delta_{xx} u_l^n +\kappa^2\delta_{xxxx} u_l^n \\
     &+ 2\sigma_0v_\text{B}
 - 2\sigma_1\delta_{t-}\delta_{xx}u_l^n,
@@ -346,7 +314,7 @@ and
 \end{equation}
 where
 \begin{equation}
-    g'(\dot z^i) = -\frac{s_1}{s_2+\frac{2}{k} + 2\sigma_0}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
+    g'(\dot z^i) = -\frac{s_1}{h(s_2+\frac{2}{k} + 2\sigma_0)}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
 \end{equation}
 In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
 \begin{equation}
@@ -372,36 +340,58 @@ Many thanks to the great number of anonymous reviewers!
 \bibliographystyle{IEEEbib}
 \bibliography{DAFx19_tmpl} % requires file DAFx19_tmpl.bib
 
-\section{Appendix: Margin Check}
-This section shows the column margins for the text. \bigskip\newline
+\section{Appendix: Interpolation and Spreading Operators}
+\label{app:interpol}
+In this section, the interpolator and spreading operator introduced in Section \ref{sec:discretisation} will be explained.
 
-Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
-
-Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.
-
-At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat.
-
-Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.
-
-Lorem ipsum dolor sit amet, consectetur adipisici elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquid ex ea commodi consequat. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat.
-
-Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat. Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis at vero eros et accumsan et iusto odio dignissim qui blandit praesent luptatum zzril delenit augue duis dolore te feugait nulla facilisi.
-
-Nam liber tempor cum soluta nobis eleifend option congue nihil imperdiet doming id quod mazim placerat facer possim assum. Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim ad minim veniam, quis nostrud exerci tation ullamcorper suscipit lobortis nisl ut aliquip ex ea commodo consequat.
-
-Duis autem vel eum iriure dolor in hendrerit in vulputate velit esse molestie consequat, vel illum dolore eu feugiat nulla facilisis.
-
-At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, At accusam aliquyam diam diam dolore dolores duo eirmod eos erat, et nonumy sed tempor et et invidunt justo labore Stet clita ea et gubergren, kasd magna no rebum. sanctus sea sed takimata ut vero voluptua. est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat.
-
-Consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. 
+The simplest way to select a grid point $l_\text{B}$ from bowing position $x_\text{B}$ on a discrete string is $l_\text{B} = \text{floor}(x_\text{B}/h)$. Applied to a gridfunction $u_l$ yields
+\begin{equation}
+    I_0(x_\text{B})u_l = u_{l_\text{B}}.
+\end{equation}
+More accurate would be to use linear interpolation 
+\begin{equation}\label{eq:linearInterpolation}
+     I_1(x_\text{B})u_l =
+      (1-\alpha_\text{B})u_{l_\text{B}}+ \alpha_\text{B}u_{l_\text{B}+1}
+\end{equation}
+where $\alpha_\text{B} = x_\text{B}/h - l_\text{B}$ is the fractional remainder of the flooring operation. Even more accurate would be to use cubic interpolation:
+% \begin{equation}\label{eq:cubicInterpolation}
+% \begin{aligned}
+%      I_3(x_\text{B})u_{l_\text{B}} =&  \frac{\alpha_\text{B}(\alpha_\text{B}-1)(\alpha_\text{B} - 2)}{-6}u_{l_\text{B}-1}+\\
+%      &\frac{(\alpha_\text{B}-1)(\alpha_\text{B}+1)(\alpha_\text{B}-2)}{2}u_{l_\text{B}}+  \frac{\alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 2)}{-2}u_{l_\text{B}+1} \\
+%      &+ \frac{\alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 1)}{6}u_{l_\text{B}+2}
+%      \end{aligned}
+% \end{equation}
+\begin{equation}
+I_3(x_\text{B}) =
+     \begin{cases}
+    \hfil 0, & l < l_{\text{B}} - 1\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}-1)(\alpha_\text{B} - 2)/{-6}, & l = l_{\text{B}} - 1\\
+    \hfil (\alpha_\text{B}-1)(\alpha_\text{B}+1)(\alpha_\text{B}-2)/2, & l = l_{\text{B}}\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 2)/{-2}, & l = l_{\text{B}} + 1\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 1)/6, & l = l_{\text{B}} +2,\\
+    \hfil 0, & l > l_\text{B} + 2
+    \end{cases}
+    \end{equation}
+spreading operator $J$ can be defined as linear \cite{Bilbao2009}:
+\begin{equation}\label{eq:linearInterpolation}
+     J_1(x_\text{B}) = \frac{1}{h}
+     \begin{cases}
+    \hfil 0, & l < l_{\text{B}}\\
+    \hfil (1-\alpha_\text{B}), & l = l_{\text{B}}\\
+    \hfil \alpha_\text{B}, & l = l_{\text{B}} + 1\\
+    \hfil 0, & l > l_\text{B} + 1
+\end{cases}
+\end{equation}
+or cubic:
+\begin{equation}\label{eq:cubicInterpolation}
+     J_3(x_\text{B}) = \frac{1}{h}
+     \begin{cases}
+    \hfil 0, & l < l_{\text{B}} - 1\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}-1)(\alpha_\text{B} - 2)/{-6}, & l = l_{\text{B}} - 1\\
+    \hfil (\alpha_\text{B}-1)(\alpha_\text{B}+1)(\alpha_\text{B}-2)/2, & l = l_{\text{B}}\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 2)/{-2}, & l = l_{\text{B}} + 1\\
+    \hfil \alpha_\text{B}(\alpha_\text{B}+1)(\alpha_\text{B} - 1)/6, & l = l_{\text{B}} +2,\\
+    \hfil 0, & l > l_\text{B} + 2
+\end{cases}
+\end{equation}
 \end{document}
