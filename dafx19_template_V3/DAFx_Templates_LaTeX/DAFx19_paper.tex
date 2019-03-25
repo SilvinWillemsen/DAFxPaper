@@ -44,6 +44,8 @@
 \documentclass[twoside,a4paper]{article}
 \usepackage{tikz}
 \tikzset{>=latex}
+\tikzstyle{block} = [draw,minimum size=0.5cm]
+\usetikzlibrary{math}
 \usepackage{dafx_19}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{euscript}
@@ -61,6 +63,22 @@
 \DeclareMathOperator{\sgn}{sgn}
 \setcounter{page}{1}
 \ninept
+
+\makeatletter
+\pgfdeclareshape{spring}{
+  \savedanchor{\center}{%
+    \pgfpointorigin}
+  \anchor{center}{\center}
+  \backgroundpath{
+    \edef\@temp{%
+      \noexpand\node[circle,draw] (\tikz@fig@name-left) at (-1,0) {};
+      \noexpand\node[circle,draw] (\tikz@fig@name-right) at (1,0) {};
+      \noexpand\draw (\tikz@fig@name-left) -- (\tikz@fig@name-right);
+}
+    \@temp
+}
+}
+\makeatother
 
 \usepackage{times}
 % Saves a lot of ouptut space in PDF... after conversion with the distiller
@@ -159,23 +177,40 @@ The templates are available in electronic form on \href{http://dafx2019.bcu.ac.u
 
 \section{Introduction}
 \label{sec:intro}
-\begin{center}
-\begin{tikzpicture}
-    % \draw[dashed] (-10 0) -- (10 0)
-     \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](I) at (2.5, 9) {};
-    \foreach \id in {1,...,4}
-    {
-        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](a\id) at (\id, 10) {};
-        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](b\id) at (\id, 9.5) {};
-        \draw [-] (a\id) edge (b\id);
-        \draw [->] (b\id) edge (I);
-    }
+In the field of physical modelling for sound synthesis, both the mathematical description and implementation of bowed string instruments have been a challenging endeavour, mainly due to the non-linear relationship between the bow and the string.
 
-\end{tikzpicture}    
-\end{center}
-Bow models:
+% Considering the subdivision of a musical instrument into an exciter and a resonator -- as first proposed in \cite{Borin1989} -- we can separately look at the physically modelled bow and the string and their development over the years.
 
-The elasto-plastic 
+In static bow-string-interaction models, the friction force is defined as a function of the relative velocity between the bow and the string only. 
+The first mathematical description of friction was proposed by Coulomb in 1773 \cite{Coulomb} to which static friction, or \textit{stiction}, was added by Morin in 1833 \cite{Morin1833} and viscous friction, or velocity-dependent friction, by Reynolds in 1886 \cite{Reynolds1886}. In 1902, Stribeck found a smooth transition between the static and the coulomb part of the friction curve now referred to as the Stribeck effect \cite{Stribeck1902}. 
+
+More recently, dynamic friction models have been developed where the friction force is not only dependent on the relative velocity, but also on 
+
+exhibiting hysteresis loops in the force vs. velocity plane.  
+Dynamic models:
+Dahl Model
+LuGre 
+The Elasto-Plastic model, as first proposed in
+\cite{Dupont2002}
+
+String:
+Digital Waveguides
+Modal Synthesis
+Mass-spring systems
+FDTD methods
+
+Physically modelled bowed strings.
+
+Many examples of physical
+FDSs have been used in \cite{Desvages2017}, Desvages used hyperbolic
+
+The bow 
+
+In \cite{Maestre2014} the authors presented a thermal bow model using a combination of digital waveguides and FDTD methods.
+
+In this work, we present an implementation of the elasto-plastic bow model applied as an external force on a FDS implementation of the damped stiff string. Furthermore, we show that it is possible to play the string in real-time with <5\% CPU usage! 
+focus on a string model with single-polarisation
+
 \section{Stiff String}
 Using the subscripts $t$ and $x$ to denote a single derivative with respect to time and space respectively, the partial differential equation of the damped stiff string is defined as \cite{Bilbao2009}
 \begin{equation}\label{eq:PDE}
@@ -183,6 +218,66 @@ Using the subscripts $t$ and $x$ to denote a single derivative with respect to t
 \end{equation}
 where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$), $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in m$^2$/s) with Young's Modulus $E$ (in Pa) and area moment of inertia $I$ (in m$^4$) and frequency independent and frequency dependent damping coefficients $\sigma_0 \geq 0$ and $\sigma_1 \geq 0$.
 \section{Elasto-Plastic Bow Model}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+    \def\radius{4}; % >2!
+
+    % \draw[->] (string) -- (bow);
+    % Draw Springs
+    \def\startY{0};
+    \def\horShift{0.7};
+    \foreach \drawing in {0, 1}
+    {
+        \node(stringText) at (0, -\drawing * 2) {string};
+        \node(bowText) at (\drawing * \horShift, 1.2 - \drawing * 2) {bow};
+        \begin{scope}
+            \clip (-1.5,-0.2- \drawing * 2) rectangle (1.5,1.5);
+            \draw (0,-\radius + 0.25 - \drawing * 2) circle(\radius);
+            % \draw (-1.5,0) -- (1.5,0);
+        \end{scope}
+        \draw[-] (-2.5 + \drawing * \horShift,1 - \drawing * 2) -- (2.5 + \drawing * \horShift, 1 - \drawing * 2);
+        \foreach \springNo in {0, ..., 5}
+        {
+            % Calculate springlength
+            \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
+            \pgfmathsetmacro{\calcSpace}{(\radius + 1) - \radius * sin(acos(\startX/\radius)) - 0.25};
+            
+            \pgfmathsetmacro{\springLength}{sqrt(\calcSpace*\calcSpace+\drawing*\horShift*\drawing*\horShift)};
+            
+            \pgfmathsetmacro{\spacing}{\springLength / 6};
+            \pgfmathsetmacro{\invAngle}{\calcSpace/\horShift}
+            \pgfmathsetmacro{\rot}{\drawing * (270+(atan(\invAngle)))};
+            \pgfmathsetmacro{\angle}{atan(\invAngle)};
+            % \node (nodeTest\springNo) at (\springNo*1.1-2, -3 - 1 * \drawing + 0.3 * \springNo) {\springLength};
+            
+            \begin{scope}[shift={(\startX + \drawing * \horShift,1 - \drawing * 2)}]
+            % \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
+            \pgfmathsetmacro{\xWidth}{0.1};
+            \draw[-, rotate = \rot] (0, \startY) -- (0, \startY - \spacing * 0.5);
+            \draw[-, rotate = \rot] (0, \startY - \spacing * 0.5) -- (\xWidth, \startY - \spacing);
+            
+            \def\Y{\startY-\spacing}
+            \foreach \idx in {1,...,4}
+            {
+                \pgfmathsetmacro{\idxMinOne}{\idx-1};
+                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+          
+                \pgfmathsetmacro{\invXWidth}{\xWidth*-1};
+                \global\let\xWidth = \invXWidth;
+                \pgfmathsetmacro{\lastYPre}{\Y - \idx * \spacing};
+                \global\let\lastY = \lastYPre;
+            }
+            \draw[-, rotate = \rot] (\xWidth, \lastY) -- (0, \lastY - \spacing * 0.5);
+            \draw[-, rotate = \rot] (0, \lastY - \spacing * 0.5) -- (0, \lastY - \spacing);
+             \end{scope}
+        }
+    }
+    \end{tikzpicture}
+    \caption{Caption}
+    \label{fig:my_label}
+\end{figure}
+
 As opposed to less complex bow models, such as the hyperbolic [source] and exponential [source] models, the elasto-plastic bow model assumes that the friction between the bow and the string is caused by a large quantity of bristles, each of which contributes to the total amount of friction. The bristles are assumed to be stiff springs with damping and can 'break' after a given break-away displacement. An extra term can be added to \eqref{eq:PDE} to include the bowing interaction
 \begin{equation}
     \begin{aligned}
@@ -289,7 +384,46 @@ and the discrete relative velocity is
 \begin{equation}\label{eq:discRelVel}
 v = I(x_\text{B}^n)\delta_{t\cdot}u_l^n -  v_\text{B}.
 \end{equation}
-where $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are an interpolator and a spreading function around time-variant bowing point $x_\text{B}^n$ (see Appendix \ref{app:interpol}).
+where $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are an interpolator and a spreading function around time-variant bowing point $x_\text{B}^n$ (see Figure \ref{fig:interpol} and Appendix \ref{app:interpol} for more details on this).
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+    %  \draw [->] (0 0) edge (1 1);
+    \draw[dashed] (0, 0) -- (5, 0);
+     \node [block, draw=black](J) at (2.5, 1) {$J_3(x_\text{B})f(v,z)$};
+     \node (u1) at (1, -0.5) {$u_{l_\text{B}-1}$};
+     \node (u2) at (2, -0.5) {$u_{l_\text{B}}$};
+     \node (u3) at (3, -0.5) {$u_{l_\text{B}+1}$};
+     \node (u4) at (4, -0.5) {$u_{l_\text{B}+2}$};
+     
+    \foreach \id in {1,...,4}
+    {
+        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](a\id) at (\id, 0) {};
+        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](b\id) at (\id, 0.5) {};
+        \draw [<-] (a\id) -- (b\id);
+        \draw [-] (b\id) edge (J);
+    }
+    \node [block](NR) at (2.5, 2) {NR};
+    \node [block](I) at (2.5, 3){$I_3(x_\text{B})u_l$};
+    \draw[dashed] (0, 4) -- (5, 4);
+    \foreach \id in {1,...,4}
+    {
+        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](c\id) at (\id, 4) {};
+        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](d\id) at (\id, 3.6) {};
+        \draw [-] (c\id) -- (d\id);
+        \draw [->] (d\id) edge (I);
+    }
+    \node(x) at (2.7, 4) {$\times$};
+    \node(x) at (2.7, 0) {$\times$};
+    \node(xb) at (2.7, 4.25) {$x_\text{B}$};
+    \draw [->] (I) edge (NR);
+    \draw [->] (NR) edge (J);
+    
+\end{tikzpicture} 
+    \caption{\it Cubic interpolation at bowing point $x_\text{B}$. The interpolator $I$ retrieves the values of four grid points which are then used in the Newton Raphson (NR) solver. This outputs the force function $f(v,z)$ that the spreading function $J$ distributes over these grid points again.}
+    \label{fig:interpol}
+\end{figure}
+
 At the bowing point we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
 We can solve \eqref{eq:FDS} at $x_\text{B}^n$ using \eqref{eq:discRelVel} and identity
 \begin{equation}
@@ -330,7 +464,7 @@ and
 \end{equation}
 where
 \begin{equation}
-    g'(\dot z^i) = -\frac{s_1}{h(s_2+\frac{2}{k} + 2\sigma_0)}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
+    g'(\dot z^i) = -\frac{s_1}{s_2+\frac{2}{k} + 2\sigma_0}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
 \end{equation}
 In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
 \begin{equation}
