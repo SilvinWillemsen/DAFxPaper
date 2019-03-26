@@ -178,35 +178,31 @@ The templates are available in electronic form on \href{http://dafx2019.bcu.ac.u
 \section{Introduction}
 \label{sec:intro}
 In the field of physical modelling for sound synthesis, both the mathematical description and implementation of bowed string instruments have been a challenging endeavour, mainly due to the non-linear relationship between the bow and the string.
-
 % Considering the subdivision of a musical instrument into an exciter and a resonator -- as first proposed in \cite{Borin1989} -- we can separately look at the physically modelled bow and the string and their development over the years.
-
-In static bow-string-interaction models, the friction force is defined as a function of the relative velocity between the bow and the string only. 
-The first mathematical description of friction was proposed by Coulomb in 1773 \cite{Coulomb} to which static friction, or \textit{stiction}, was added by Morin in 1833 \cite{Morin1833} and viscous friction, or velocity-dependent friction, by Reynolds in 1886 \cite{Reynolds1886}. In 1902, Stribeck found a smooth transition between the static and the coulomb part of the friction curve now referred to as the Stribeck effect \cite{Stribeck1902}. 
-
-More recently, dynamic friction models have been developed where the friction force is not only dependent on the relative velocity, but also on 
-
-exhibiting hysteresis loops in the force vs. velocity plane.  
+Models describing this relationship can be subdivided into static and dynamic, the latter of which has only seen major developments in the last two decades.
+More recently, dynamic friction models have been developed where the friction force is described through a differential equation. Furthermore, the models are not only dependent on the relative velocity, but also on other variables \textbf{is this always true?}. Static friction models can lead to problems in implementation, as a unique solution is not always possible. Dynamic models exhibit hysteresis loops in the force vs. velocity plane that solve this \textbf{true? If so, describe better..}.
 Dynamic models:
 Dahl Model
 LuGre 
-The Elasto-Plastic model, as first proposed in
-\cite{Dupont2002}
+Thermal friction
 
+
+A more general model is the elast-plastic model, as first proposed in \cite{Dupont2002}. 
 String:
-Digital Waveguides
-Modal Synthesis
-Mass-spring systems
-FDTD methods
 
 Physically modelled bowed strings.
+The first efficient implementation of the bowed string for real-time implementation was presented by Smith in \cite{Smith1986} and used digital waveguides for the string and a look-up table for the bow interaction.
+on the oscillations of... one of the first simulations of different non-linear oscillators (including bowed strings)
+Examples of physically modelled bowed strings can be found in 
 
-Many examples of physical
-FDSs have been used in \cite{Desvages2017}, Desvages used hyperbolic
+In \cite{Desvages2017}, Desvages used finite-difference schemes and a static friction model (double exponential) 
 
 The bow 
 
-In \cite{Maestre2014} the authors presented a thermal bow model using a combination of digital waveguides and FDTD methods.
+Thermal model was first presented in \cite{Woodhouse2003}
+the authors presented a thermal bow model
+
+In \cite{Maestre2014} the authors adapted this thermal model to work in real time using a combination of digital waveguides and FDTD methods.
 
 In this work, we present an implementation of the elasto-plastic bow model applied as an external force on a FDS implementation of the damped stiff string. Furthermore, we show that it is possible to play the string in real-time with <5\% CPU usage! 
 focus on a string model with single-polarisation
@@ -221,60 +217,125 @@ where $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), 
 \begin{figure}[h]
     \centering
     \begin{tikzpicture}
-    \def\radius{4}; % >2!
-
-    % \draw[->] (string) -- (bow);
-    % Draw Springs
-    \def\startY{0};
-    \def\horShift{0.7};
-    \foreach \drawing in {0, 1}
+    
+    \def\radius{6}; % Radius of the string (>2!)
+    \pgfmathsetmacro{\reps}{3}; % How may back-and-forths in the drawing of the springs
+    \def\horShift{0.7}; %how far the bow is shifted to the right in b)
+    \def\bowSpacing{0.2};
+    \def\drawingSpacing{1.5}
+    %subfigure letters
+    \node (A) at (-3, 0.5) {a)};
+    \node (B) at (-3, 0.5 - \drawingSpacing) {b)};
+    \node (C) at (-3, 0.5 - \drawingSpacing * 2) {c)};
+    
+    \pgfmathsetmacro{\zCoordTop}{0};
+    \pgfmathsetmacro{\zYCoordBottom}{0};
+    \def\springForZ{2}
+    \foreach \drawing in {0, ..., 2}
     {
-        \node(stringText) at (0, -\drawing * 2) {string};
-        \node(bowText) at (\drawing * \horShift, 1.2 - \drawing * 2) {bow};
+        %% Draw String
         \begin{scope}
-            \clip (-1.5,-0.2- \drawing * 2) rectangle (1.5,1.5);
-            \draw (0,-\radius + 0.25 - \drawing * 2) circle(\radius);
-            % \draw (-1.5,0) -- (1.5,0);
+            \clip (-1.5,-0.2- \drawing * \drawingSpacing) rectangle (1.5,1.5);
+            \draw (0,-\radius + 0.25 - \drawing * \drawingSpacing) circle(\radius);
         \end{scope}
-        \draw[-] (-2.5 + \drawing * \horShift,1 - \drawing * 2) -- (2.5 + \drawing * \horShift, 1 - \drawing * 2);
+        
+        %% Draw Bow
+        \def\bowWidth{5};
+        \def\halfBW{\bowWidth*0.5}
+        \pgfmathsetmacro{\halfNumDiag}{0.5 * \bowWidth / \bowSpacing};
+        \draw[-] (-\halfBW + \drawing * \horShift,1 - \drawing * \drawingSpacing) -- (\halfBW + \drawing * \horShift, 1 - \drawing * \drawingSpacing);
+        \foreach \bowDiag in {-\halfNumDiag, ...,\halfNumDiag}
+        {
+        \pgfmathtruncatemacro{\bD}{\bowDiag}
+        \ifnum\drawing=0
+            \ifnum\bD<-1
+                \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
+                \else
+                \ifnum\bD>1
+                    \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, \drawing * -2 + 0.1 + 1);
+                \fi
+            \fi
+            \else
+            \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
+        \fi
+            
+        }
+        
+        %% Draw Springs
         \foreach \springNo in {0, ..., 5}
         {
-            % Calculate springlength
+            % Calculate spring length depending on the radius of the string
             \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
             \pgfmathsetmacro{\calcSpace}{(\radius + 1) - \radius * sin(acos(\startX/\radius)) - 0.25};
-            
             \pgfmathsetmacro{\springLength}{sqrt(\calcSpace*\calcSpace+\drawing*\horShift*\drawing*\horShift)};
             
-            \pgfmathsetmacro{\spacing}{\springLength / 6};
-            \pgfmathsetmacro{\invAngle}{\calcSpace/\horShift}
-            \pgfmathsetmacro{\rot}{\drawing * (270+(atan(\invAngle)))};
-            \pgfmathsetmacro{\angle}{atan(\invAngle)};
-            % \node (nodeTest\springNo) at (\springNo*1.1-2, -3 - 1 * \drawing + 0.3 * \springNo) {\springLength};
+            \pgfmathsetmacro{\spacing}{\springLength / (\reps + 2)}; 
+            % spacing between two spring-back-and-forths
+            \ifnum\drawing=0
+                \pgfmathsetmacro{\rot}{0};
+            \else
+                \pgfmathsetmacro{\rot}{(270+(atan(\calcSpace/(\drawing*\horShift))))}; %rotation of the springs
+            \fi
             
-            \begin{scope}[shift={(\startX + \drawing * \horShift,1 - \drawing * 2)}]
-            % \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
-            \pgfmathsetmacro{\xWidth}{0.1};
-            \draw[-, rotate = \rot] (0, \startY) -- (0, \startY - \spacing * 0.5);
-            \draw[-, rotate = \rot] (0, \startY - \spacing * 0.5) -- (\xWidth, \startY - \spacing);
+            \ifnum\drawing=1
+                \ifnum\springNo=\springForZ
+                    \pgfmathsetmacro{\resTwo}{sqrt(\springLength*\springLength-\horShift*\horShift)};
+                    \global\let\zCoordBottom = \resTwo;
+                \fi
+            \fi
             
-            \def\Y{\startY-\spacing}
-            \foreach \idx in {1,...,4}
-            {
-                \pgfmathsetmacro{\idxMinOne}{\idx-1};
-                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
-          
-                \pgfmathsetmacro{\invXWidth}{\xWidth*-1};
-                \global\let\xWidth = \invXWidth;
-                \pgfmathsetmacro{\lastYPre}{\Y - \idx * \spacing};
-                \global\let\lastY = \lastYPre;
-            }
-            \draw[-, rotate = \rot] (\xWidth, \lastY) -- (0, \lastY - \spacing * 0.5);
-            \draw[-, rotate = \rot] (0, \lastY - \spacing * 0.5) -- (0, \lastY - \spacing);
+            %debug code
+            % \node (nodeTest\springNo) at (\springNo*1.1-2, -3 - 1 * \drawing + 0.3 * \springNo) {\zCoordTop};
+            
+            \begin{scope}[shift={(\startX + \drawing * \horShift,1 -\drawing * \drawingSpacing)}]
+                \pgfmathsetmacro{\xWidth}{0.1 - (\drawing * 0.02)};
+                \draw[-, rotate = \rot] (0, 0) -- (0, -\spacing * 0.5);
+                \draw[-, rotate = \rot] (0, -\spacing * 0.5) -- (\xWidth, -\spacing);
+                
+                \def\Y{-\spacing}
+                \foreach \idx in {1,...,\reps}
+                {
+                    \pgfmathsetmacro{\idxMinOne}{\idx-1};
+                    \ifnum\drawing=2
+                        \pgfmathtruncatemacro{\idxT}{\reps * 0.5 + 1}
+                        \ifnum\idx=\idxT
+                            \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing*0.6);
+                            \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing * 1.66) -- (-\xWidth,\Y - \idx * \spacing);
+                        \else
+                            \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                        \fi
+                    \else
+                        \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                    \fi
+                    \pgfmathsetmacro{\invXWidth}{\xWidth*-1};
+                    \global\let\xWidth = \invXWidth;
+                    \pgfmathsetmacro{\lastYPre}{\Y - \idx * \spacing};
+                    \global\let\lastY = \lastYPre;
+                }
+                \draw[-, rotate = \rot] (\xWidth, \lastY) -- (0, \lastY - \spacing * 0.5);
+                \draw[-, rotate = \rot] (0, \lastY - \spacing * 0.5) -- (0, \lastY - \spacing);
              \end{scope}
+             
         }
+        % \draw[<->] (2,2-0.707) -- node[right] {$r=\sqrt{2} \Rightarrow A=\pi(\sqrt{2})^2=2\pi$} (2,2+0.707);
+        
+        % \node(stringText) at (0, -\drawing * 2) {string};
+        % \node[block, minimum height = 0.15cm, fill=white, draw=white] (bowText) at (\drawing * \horShift, 1.23 - \drawing * 2) {bow};
     }
+    \filldraw[black] (-1.25+\springForZ*0.5 + \horShift,1-\drawingSpacing) circle (1pt) node[anchor=center](topZ){};
+    \filldraw[black] (-1.25++\springForZ*0.5,1-\zCoordBottom-\drawingSpacing) circle (1pt) node[anchor=center](bottomZ){};
+    
+    \node [](leftNode) at (-1.25+\springForZ*0.5,-\drawingSpacing - 0.1) {};
+    \node [](rightNode) at (-1.25 +\springForZ*0.5 + \horShift,-\drawingSpacing - 0.1) {};
+    
+    \draw[<->] (leftNode.center) -- (rightNode.center) node [midway, above] (TextNode) {$z$};
+    \draw[dashed, gray] (leftNode) -- (bottomZ);
+    \draw[dashed, gray] (rightNode) -- (topZ);
+    %% Draw bow and string texts
+        \node(stringText) at (0, 0) {string};
+        \node(bowText) at (0, 1.23) {bow};
     \end{tikzpicture}
-    \caption{Caption}
+    \caption{Microscopic displacements of the bristles between the bow and the string.}
     \label{fig:my_label}
 \end{figure}
 
