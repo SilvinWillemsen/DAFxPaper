@@ -41,11 +41,11 @@
 % Authors' affiliations have to be set below
 
 %------------------------------------------------------------------------------------------
-\documentclass[twoside,a4paper]{article}
-% \usepackage{tikz}
-% \tikzset{>=latex}
-% \tikzstyle{block} = [draw,minimum size=0.5cm]
-% \usetikzlibrary{math}
+\documentclass[twoside,a4paper,dvipsnames]{article}
+\usepackage{tikz}
+\tikzset{>=latex}
+\tikzstyle{block} = [draw,minimum size=0.5cm]
+\usetikzlibrary{math}
 \usepackage{dafx_19}
 \usepackage{amsmath,amssymb,amsfonts,amsthm}
 \usepackage{euscript}
@@ -143,7 +143,7 @@
 % {\href{http://dafx16.vutbr.cz}{SPLab} \\ Brno University of Technology \\ Brno, Czech Republic \\ {\tt \href{mailto:dafx16@vutbr.cz}{dafx16@vutbr.cz}}}
 %-------------------------------------FOUR-AUTHOR HEADER ENDS------------------------------------------------------
 
-\usepackage[dvipsnames]{xcolor}
+\usepackage{xcolor}
 \def\SBcomment[#1]{\textcolor{Red}{#1}}
 \def\SWcomment[#1]{\textcolor{Blue}{#1}}
 
@@ -188,158 +188,158 @@ In our implementation we assume simply supported boundary conditions, which, for
 \end{equation}
 
 \section{Elasto-Plastic Bow Model}\label{sec:elasto}
-% \begin{figure}[h]
-%     \centering
-%     \begin{tikzpicture}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
     
-%     \def\radius{6}; % Radius of the string (>2!)
-%     \pgfmathsetmacro{\reps}{3}; % How may back-and-forths in the drawing of the springs
-%     \def\horShift{0.5}; %how far the bow is shifted to the right in b)
-%     \def\bowSpacing{0.2};
-%     \def\drawingSpacing{1.5}
-%     \def\bowWidth{5};
+    \def\radius{6}; % Radius of the string (>2!)
+    \pgfmathsetmacro{\reps}{3}; % How may back-and-forths in the drawing of the springs
+    \def\horShift{0.5}; %how far the bow is shifted to the right in b)
+    \def\bowSpacing{0.2};
+    \def\drawingSpacing{1.5}
+    \def\bowWidth{5};
     
-%     %subfigure letters
-%     \node (A) at (-2.8, 0.5) {a)};
-%     \node (B) at (-2.8, 0.5 - \drawingSpacing) {b)};
-%     \node (C) at (-2.8, 0.5 - \drawingSpacing * 2) {c)};
-%     \node (D) at (-2.8, 0.5 - \drawingSpacing * 3) {d)};
+    %subfigure letters
+    \node (A) at (-2.8, 0.5) {a)};
+    \node (B) at (-2.8, 0.5 - \drawingSpacing) {b)};
+    \node (C) at (-2.8, 0.5 - \drawingSpacing * 2) {c)};
+    \node (D) at (-2.8, 0.5 - \drawingSpacing * 3) {d)};
     
-%     %bow velocity arrow
-%     \draw[->] (-1, 1.3) -- (1, 1.3) node [midway, above] (velText) {$v_\text{B}$};
+    %bow velocity arrow
+    \draw[->] (-1, 1.3) -- (1, 1.3) node [midway, above] (velText) {$v_\text{B}$};
     
-%     \pgfmathsetmacro{\zCoordTop}{0};
-%     \pgfmathsetmacro{\zYCoordBottom}{0};
-%     \def\springForZ{2}
-%     \foreach \drawing in {0, ..., 3}
-%     {
-%         %% Draw String
-%         \begin{scope}
-%             \clip (-1.5,-0.2- \drawing * \drawingSpacing) rectangle (1.5,1.5);
-%             \draw (0,-\radius + 0.25 - \drawing * \drawingSpacing) circle(\radius);
-%         \end{scope}
+    \pgfmathsetmacro{\zCoordTop}{0};
+    \pgfmathsetmacro{\zYCoordBottom}{0};
+    \def\springForZ{2}
+    \foreach \drawing in {0, ..., 3}
+    {
+        %% Draw String
+        \begin{scope}
+            \clip (-1.5,-0.2- \drawing * \drawingSpacing) rectangle (1.5,1.5);
+            \draw (0,-\radius + 0.25 - \drawing * \drawingSpacing) circle(\radius);
+        \end{scope}
 
-%         %% Draw Bow
-%         \def\halfBW{\bowWidth*0.5}
-%         \pgfmathsetmacro{\halfNumDiag}{0.5 * \bowWidth / \bowSpacing};
-%         \draw[-] (-\halfBW + \drawing * \horShift,1 - \drawing * \drawingSpacing) -- (\halfBW + \drawing * \horShift, 1 - \drawing * \drawingSpacing);
-%         \foreach \bowDiag in {-\halfNumDiag, ...,\halfNumDiag}
-%         {
-%         \pgfmathtruncatemacro{\bD}{\bowDiag}
-%         % \ifnum\drawing=0
-%         %     \ifnum\bD<-1
-%         %         \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
-%         %         \else
-%         %         \ifnum\bD>1
-%         %             \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, \drawing * -2 + 0.1 + 1);
-%         %         \fi
-%         %     \fi
-%         % \else
-%             \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
-%         % \fi
+        %% Draw Bow
+        \def\halfBW{\bowWidth*0.5}
+        \pgfmathsetmacro{\halfNumDiag}{0.5 * \bowWidth / \bowSpacing};
+        \draw[-] (-\halfBW + \drawing * \horShift,1 - \drawing * \drawingSpacing) -- (\halfBW + \drawing * \horShift, 1 - \drawing * \drawingSpacing);
+        \foreach \bowDiag in {-\halfNumDiag, ...,\halfNumDiag}
+        {
+        \pgfmathtruncatemacro{\bD}{\bowDiag}
+        % \ifnum\drawing=0
+        %     \ifnum\bD<-1
+        %         \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
+        %         \else
+        %         \ifnum\bD>1
+        %             \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, \drawing * -2 + 0.1 + 1);
+        %         \fi
+        %     \fi
+        % \else
+            \draw[-] (\drawing * \horShift + \bowDiag * \bowSpacing, -\drawing * \drawingSpacing + 1) -- (\drawing * \horShift + \bowDiag * \bowSpacing + 0.1, -\drawing * \drawingSpacing + 0.1 + 1);
+        % \fi
             
-%         }
+        }
         
-%         \def\brokenSprings{{0, 1, 1, 0, 1, 0}};
-%         %% Draw Springs
-%         \foreach \springNo in {0, ..., 5}
-%         {
-%             % Calculate spring length depending on the radius of the string
-%             \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
-%             \pgfmathsetmacro{\calcSpace}{(\radius + 1) - \radius * sin(acos(\startX/\radius)) - 0.25};
-%             \pgfmathsetmacro{\springLength}{sqrt(\calcSpace*\calcSpace+\drawing*\horShift*\drawing*\horShift)};
+        \def\brokenSprings{{0, 1, 1, 0, 1, 0}};
+        %% Draw Springs
+        \foreach \springNo in {0, ..., 5}
+        {
+            % Calculate spring length depending on the radius of the string
+            \pgfmathsetmacro{\startX}{\springNo  * 0.5 - 1.25};
+            \pgfmathsetmacro{\calcSpace}{(\radius + 1) - \radius * sin(acos(\startX/\radius)) - 0.25};
+            \pgfmathsetmacro{\springLength}{sqrt(\calcSpace*\calcSpace+\drawing*\horShift*\drawing*\horShift)};
             
-%             \pgfmathsetmacro{\spacing}{\springLength / (\reps + 2)}; 
-%             % spacing between two spring-back-and-forths
-%             \ifnum\drawing=0
-%                 \pgfmathsetmacro{\rot}{0};
-%             \else
-%                 \pgfmathsetmacro{\rot}{(270+(atan(\calcSpace/(\drawing*\horShift))))}; %rotation of the springs
-%             \fi
+            \pgfmathsetmacro{\spacing}{\springLength / (\reps + 2)}; 
+            % spacing between two spring-back-and-forths
+            \ifnum\drawing=0
+                \pgfmathsetmacro{\rot}{0};
+            \else
+                \pgfmathsetmacro{\rot}{(270+(atan(\calcSpace/(\drawing*\horShift))))}; %rotation of the springs
+            \fi
             
-%             \ifnum\drawing=1
-%                 \ifnum\springNo=\springForZ
-%                     \pgfmathsetmacro{\resTwo}{sqrt(\springLength*\springLength-\horShift*\horShift)};
-%                     \global\let\zCoordBottom = \resTwo;
-%                 \fi
-%             \fi
+            \ifnum\drawing=1
+                \ifnum\springNo=\springForZ
+                    \pgfmathsetmacro{\resTwo}{sqrt(\springLength*\springLength-\horShift*\horShift)};
+                    \global\let\zCoordBottom = \resTwo;
+                \fi
+            \fi
         
-%             \pgfmathsetmacro{\isBroken}{\brokenSprings[\springNo]};
-%             % debug code
-%             % \node (nodeTest\springNo) at (\springNo*1.1-2, -3 - 1 * \drawing + 0.3 * \springNo) {\isBroken};
+            \pgfmathsetmacro{\isBroken}{\brokenSprings[\springNo]};
+            % debug code
+            % \node (nodeTest\springNo) at (\springNo*1.1-2, -3 - 1 * \drawing + 0.3 * \springNo) {\isBroken};
             
-%             \begin{scope}[shift={(\startX + \drawing * \horShift,1 -\drawing * \drawingSpacing)}]
-%                 \pgfmathsetmacro{\xWidth}{0.1 - (\drawing * 0.02)};
-%                 \draw[-, rotate = \rot] (0, 0) -- (0, -\spacing * 0.5);
-%                 \draw[-, rotate = \rot] (0, -\spacing * 0.5) -- (\xWidth, -\spacing);
-%                 \def\Y{-\spacing}
-%                 \foreach \idx in {1,...,\reps}
-%                 {
-%                     \pgfmathsetmacro{\idxMinOne}{\idx-1};
-%                     \ifnum\drawing=2
-%                         \ifnum\isBroken=1
-%                             \pgfmathtruncatemacro{\idxT}{\reps * 0.5 + 1}
-%                             \ifnum\idx=\idxT
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing*0.6);
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing * 1.66) -- (-\xWidth,\Y - \idx * \spacing);
-%                             \else
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
-%                             \fi
-%                         \else
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
-%                         \fi
-%                     \else
-%                         \ifnum\drawing=3
-%                             \pgfmathtruncatemacro{\idxT}{\reps * 0.5 + 1}
-%                             \ifnum\idx=\idxT
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing*0.6);
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing * 1.66) -- (-\xWidth,\Y - \idx * \spacing);
-%                             \else
-%                                 \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
-%                             \fi
-%                         \else
-%                             \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
-%                         \fi
-%                     \fi
-%                     \pgfmathsetmacro{\invXWidth}{\xWidth*-1};
-%                     \global\let\xWidth = \invXWidth;
-%                     \pgfmathsetmacro{\lastYPre}{\Y - \idx * \spacing};
-%                     \global\let\lastY = \lastYPre;
-%                 }
-%                 \draw[-, rotate = \rot] (\xWidth, \lastY) -- (0, \lastY - \spacing * 0.5);
-%                 \draw[-, rotate = \rot] (0, \lastY - \spacing * 0.5) -- (0, \lastY - \spacing);
-%              \end{scope}
+            \begin{scope}[shift={(\startX + \drawing * \horShift,1 -\drawing * \drawingSpacing)}]
+                \pgfmathsetmacro{\xWidth}{0.1 - (\drawing * 0.02)};
+                \draw[-, rotate = \rot] (0, 0) -- (0, -\spacing * 0.5);
+                \draw[-, rotate = \rot] (0, -\spacing * 0.5) -- (\xWidth, -\spacing);
+                \def\Y{-\spacing}
+                \foreach \idx in {1,...,\reps}
+                {
+                    \pgfmathsetmacro{\idxMinOne}{\idx-1};
+                    \ifnum\drawing=2
+                        \ifnum\isBroken=1
+                            \pgfmathtruncatemacro{\idxT}{\reps * 0.5 + 1}
+                            \ifnum\idx=\idxT
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing*0.6);
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing * 1.66) -- (-\xWidth,\Y - \idx * \spacing);
+                            \else
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                            \fi
+                        \else
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                        \fi
+                    \else
+                        \ifnum\drawing=3
+                            \pgfmathtruncatemacro{\idxT}{\reps * 0.5 + 1}
+                            \ifnum\idx=\idxT
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing*0.6);
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing * 1.66) -- (-\xWidth,\Y - \idx * \spacing);
+                            \else
+                                \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                            \fi
+                        \else
+                            \draw[-, rotate = \rot] (\xWidth, \Y - \idxMinOne * \spacing) -- (-\xWidth,\Y - \idx * \spacing);
+                        \fi
+                    \fi
+                    \pgfmathsetmacro{\invXWidth}{\xWidth*-1};
+                    \global\let\xWidth = \invXWidth;
+                    \pgfmathsetmacro{\lastYPre}{\Y - \idx * \spacing};
+                    \global\let\lastY = \lastYPre;
+                }
+                \draw[-, rotate = \rot] (\xWidth, \lastY) -- (0, \lastY - \spacing * 0.5);
+                \draw[-, rotate = \rot] (0, \lastY - \spacing * 0.5) -- (0, \lastY - \spacing);
+             \end{scope}
              
-%         }
-%         % \draw[<->] (2,2-0.707) -- node[right] {$r=\sqrt{2} \Rightarrow A=\pi(\sqrt{2})^2=2\pi$} (2,2+0.707);
+        }
+        % \draw[<->] (2,2-0.707) -- node[right] {$r=\sqrt{2} \Rightarrow A=\pi(\sqrt{2})^2=2\pi$} (2,2+0.707);
         
-%         % \node(stringText) at (0, -\drawing * 2) {string};
-%         % \node[block, minimum height = 0.15cm, fill=white, draw=white] (bowText) at (\drawing * \horShift, 1.23 - \drawing * 2) {bow};
-%     }
-%     \filldraw[black] (-1.25+\springForZ*0.5 + \horShift,1-\drawingSpacing) circle (1pt) node[anchor=center](topZ){};
-%     \filldraw[black] (-1.25++\springForZ*0.5,1-\zCoordBottom-\drawingSpacing) circle (1pt) node[anchor=center](bottomZ){};
+        % \node(stringText) at (0, -\drawing * 2) {string};
+        % \node[block, minimum height = 0.15cm, fill=white, draw=white] (bowText) at (\drawing * \horShift, 1.23 - \drawing * 2) {bow};
+    }
+    \filldraw[black] (-1.25+\springForZ*0.5 + \horShift,1-\drawingSpacing) circle (1pt) node[anchor=center](topZ){};
+    \filldraw[black] (-1.25++\springForZ*0.5,1-\zCoordBottom-\drawingSpacing) circle (1pt) node[anchor=center](bottomZ){};
     
-%     \node [](leftNode) at (-1.25+\springForZ*0.5,-\drawingSpacing - 0.1) {};
-%     \node [](rightNode) at (-1.25 +\springForZ*0.5 + \horShift,-\drawingSpacing - 0.1) {};
+    \node [](leftNode) at (-1.25+\springForZ*0.5,-\drawingSpacing - 0.1) {};
+    \node [](rightNode) at (-1.25 +\springForZ*0.5 + \horShift,-\drawingSpacing - 0.1) {};
     
-%     \draw[<->] (leftNode.center) -- (rightNode.center) node [midway, above] (TextNode) {$z$};
-%     \draw[dashed, darkgray] (leftNode) -- (bottomZ);
-%     \draw[dashed, darkgray] (rightNode) -- (topZ);
-%     %% Draw bow and string texts
-%         \node(stringText) at (0, 0) {string};
-%         \node(bowText) at (3, 1.1) {bow};
-%     %% Draw descriptions of z
-%     \def\zTexts{{"$z=0$", "$0<|z|<z_{\text{ba}}$", "$z_{\text{ba}}<|z|< z_\text{ss}$", "$|z|>z_\text{ss}$"}};
+    \draw[<->] (leftNode.center) -- (rightNode.center) node [midway, above] (TextNode) {$z$};
+    \draw[dashed, darkgray] (leftNode) -- (bottomZ);
+    \draw[dashed, darkgray] (rightNode) -- (topZ);
+    %% Draw bow and string texts
+        \node(stringText) at (0, 0) {string};
+        \node(bowText) at (3, 1.1) {bow};
+    %% Draw descriptions of z
+    \def\zTexts{{"$z=0$", "$0<|z|<z_{\text{ba}}$", "$z_{\text{ba}}<|z|< z_\text{ss}$", "$|z|>z_\text{ss}$"}};
     
-%     \node[anchor = east](zText1) at (5.3, 0.5) {$z=0$};
-%     \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing) {$0<|z|\leq z_{\text{ba}}$};
-%     \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing * 2) {$z_{\text{ba}}<|z|\leq |z_\text{ss}|$};
-%     \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing * 3) {$|z|>|z_\text{ss}|$};
+    \node[anchor = east](zText1) at (5.3, 0.5) {$z=0$};
+    \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing) {$0<|z|\leq z_{\text{ba}}$};
+    \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing * 2) {$z_{\text{ba}}<|z|\leq |z_\text{ss}|$};
+    \node[anchor = east](zText1) at (5.3, 0.5 - \drawingSpacing * 3) {$|z|>|z_\text{ss}|$};
     
-%     \end{tikzpicture}
-%     \caption{\it Microscopic displacements of the bristles between the bow and the string. The bow moves right with a velocity of $v_\text{B}$. a) The initial state is where the average bristle displacement $z=0$. b) The bow has moved right relative to the string. The purely elastic, or presliding regime is entered (stick). c) After the break-away displacement $z_\text{ba}$, more and more bristles start to `break'. This is defined as the elasto-plastic regime. d) After all bristles have `broken', the steady state (slip) is reached and the purely plastic regime is entered.}
-%     \label{fig:elastoPlastic}
-% \end{figure}
+    \end{tikzpicture}
+    \caption{\it Microscopic displacements of the bristles between the bow and the string. The bow moves right with a velocity of $v_\text{B}$. a) The initial state is where the average bristle displacement $z=0$. b) The bow has moved right relative to the string. The purely elastic, or presliding regime is entered (stick). c) After the break-away displacement $z_\text{ba}$, more and more bristles start to `break'. This is defined as the elasto-plastic regime. d) After all bristles have `broken', the steady state (slip) is reached and the purely plastic regime is entered.}
+    \label{fig:elastoPlastic}
+\end{figure}
 
 As mentioned, the elasto-plastic bow model assumes that the friction between the bow and the string is caused by a large quantity of bristles, each of which contributes to the total amount of friction. See Figure \ref{fig:elastoPlastic} for a visual explanation of this. The bristles are assumed to be stiff springs with damping and can `break' after a given break-away displacement. An extra term can be added to \eqref{eq:PDE} to include the bowing interaction
 \begin{equation}
@@ -352,7 +352,7 @@ with spatial Dirac delta function $\delta(x-x_\text{B})$ applying the bowing fun
 \begin{equation}\label{eq:relVel}
   v = u_t(x_\text{B}) - v_\text{B}
 \end{equation}
-and the aforementioned average bristle displacement $z$. In the following we will use the definitions found in \cite{Dupont2002}. The bowing function itself is defined as:
+and the aforementioned average bristle displacement $z$. In the implementation, $v_\text{B}$ will a user-controlled. In the following we will use the definitions found in \cite{Dupont2002}. The bowing function itself is defined as:
 \begin{equation}\label{eq:forceFunction}
     f(v, z) = s_0z + s_1\dot z + s_2v
 \end{equation}
@@ -365,8 +365,7 @@ where $\dot{z}$ indicates an ordinary time derivative of $z$, and $z_\text{ss}$ 
 \begin{equation}
     z_\text{ss}(v) = \frac{\sgn(v)}{s_0}\Big[f_\text{c}+(f_\text{s}-f_\text{c})e^{-(v/v_\text{s})^2}\Big].
 \end{equation}
-with Stribeck velocity $v_\text{s}$ (in m/s), coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. \SBcomment[is $f_{N}$ an externally supplied signal?]\SWcomment[In the C++ case, yes. In the Matlab case it will be set to a value between 1 and 100 N. ]\SBcomment[OK, i guess I meant that you could point out that $f_{N}$ and $v_{B}$ have to be supplied externally---they aren't unknowns to be solved for.]\SWcomment[Ah I see. I'll add that :)]
-Furthermore, the adhesion map between the bow and the string is defined as
+with Stribeck velocity $v_\text{s}$ (in m/s), coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. Like $v_\text{B}$, $f_\text{N}$ will be user-controlled in the implementation. Furthermore, the adhesion map between the bow and the string is defined as
 \begin{equation}\label{eq:adhesionMap}
 \alpha(v, z) 
 \begin{aligned}
@@ -385,7 +384,7 @@ where the transition between the elastic and plastic behaviour is defined as
 \begin{equation}\label{eq:alphaM}
     \alpha_\text{m} = \frac{1}{2}\bigg[1+\sgn(z)\sin\bigg(\pi\frac{z-\sgn(z)\frac{1}{2}(|z_\text{ss}(v)|+z_\text{ba})}{|z_\text{ss}(v)|-z_\text{ba}}\bigg)\bigg],
 \end{equation}
-with break-away displacement $z_\text{ba}$, i.e. where the bristles start to break, as mentioned at the beginning of this section. A visualisation of the adhesion map can be found in Figure \ref{fig:alphaPlot}.\footnote{Interesting to note is that in the literature on this topic, several errors can be found in the definition of $\alpha(v,z)$: 1) all uses of $z_\text{ss}$ in \eqref{eq:adhesionMap} and \eqref{eq:alphaM} lack the absolute value operator, 2) the multiplications with $\sgn(z)$ in \eqref{eq:alphaM} are excluded, 3) $\alpha(v,z)$ is undefined for $|z|=z_\text{ba}$ and $|z|=|z_\text{ss}(v)|$. It can be shown that only with the definitions presented here, is it possible to obtain the curve shown in Figure \ref{fig:alphaPlot}.} \SWcomment[<- maybe this paragraph is a little too pretentious haha ]\SBcomment[Yes, maybe it will piss off the reviewers]\SWcomment[Haha, so I thought.. I'll talk to Stefania about how to make this a little more professional. ]\SBcomment[This would be a good thing to put in a footnote.]
+with break-away displacement $z_\text{ba}$, i.e. where the bristles start to break, as mentioned at the beginning of this section. A visualisation of the adhesion map can be found in Figure \ref{fig:alphaPlot}.\footnote{Interesting to note is that in the literature on this topic, few inaccuracies can be found in the definition of $\alpha(v,z)$: 1) all uses of $z_\text{ss}$ in \eqref{eq:adhesionMap} and \eqref{eq:alphaM} lack the absolute value operator, 2) the multiplications with $\sgn(z)$ in \eqref{eq:alphaM} are excluded, 3) $\alpha(v,z)$ is undefined for $|z|=z_\text{ba}$ and $|z|=|z_\text{ss}(v)|$. It can be shown that only with the definitions presented here, is it possible to obtain the curve shown in Figure \ref{fig:alphaPlot}.}
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{untitled.eps}}
@@ -433,44 +432,44 @@ where the discrete relative velocity described in \eqref{eq:relVel} is
 v = I(x_\text{B}^n)\delta_{t\cdot}u_l^n -  v_\text{B}.
 \end{equation}
 Here, $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are an interpolator and a spreading function around time-variant bowing point $x_\text{B}^n$ (see Figure \ref{fig:interpol} and Appendix \ref{app:interpol} for more details on this).
-% \begin{figure}[h]
-%     \centering
-%     \begin{tikzpicture}
-%     %  \draw [->] (0 0) edge (1 1);
-%     \draw[dashed] (0, 0) -- (5, 0);
-%      \node [block, draw=black](J) at (2.5, 1) {$J_3(x_\text{B})f(v,z)$};
-%      \node (u1) at (1, -0.5) {$u_{l_\text{B}-1}$};
-%      \node (u2) at (2, -0.5) {$u_{l_\text{B}}$};
-%      \node (u3) at (3, -0.5) {$u_{l_\text{B}+1}$};
-%      \node (u4) at (4, -0.5) {$u_{l_\text{B}+2}$};
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}
+    %  \draw [->] (0 0) edge (1 1);
+    \draw[dashed] (0, 0) -- (5, 0);
+     \node [block, draw=black](J) at (2.5, 1) {$J_3(x_\text{B})f(v,z)$};
+     \node (u1) at (1, -0.5) {$u_{l_\text{B}-1}$};
+     \node (u2) at (2, -0.5) {$u_{l_\text{B}}$};
+     \node (u3) at (3, -0.5) {$u_{l_\text{B}+1}$};
+     \node (u4) at (4, -0.5) {$u_{l_\text{B}+2}$};
      
-%     \foreach \id in {1,...,4}
-%     {
-%         \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](a\id) at (\id, 0) {};
-%         \node [circle, fill=black, inner sep=0pt,minimum size=2pt](b\id) at (\id, 0.5) {};
-%         \draw [<-] (a\id) -- (b\id);
-%         \draw [-] (b\id) edge (J);
-%     }
-%     \node [block](NR) at (2.5, 2) {NR};
-%     \node [block](I) at (2.5, 3){$I_3(x_\text{B})u_l$};
-%     \draw[dashed] (0, 4) -- (5, 4);
-%     \foreach \id in {1,...,4}
-%     {
-%         \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](c\id) at (\id, 4) {};
-%         \node [circle, fill=black, inner sep=0pt,minimum size=2pt](d\id) at (\id, 3.6) {};
-%         \draw [-] (c\id) -- (d\id);
-%         \draw [->] (d\id) edge (I);
-%     }
-%     \node(x) at (2.7, 4) {$\times$};
-%     \node(x) at (2.7, 0) {$\times$};
-%     \node(xb) at (2.7, 4.25) {$x_\text{B}$};
-%     \draw [->] (I) edge (NR);
-%     \draw [->] (NR) edge (J);
+    \foreach \id in {1,...,4}
+    {
+        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](a\id) at (\id, 0) {};
+        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](b\id) at (\id, 0.5) {};
+        \draw [<-] (a\id) -- (b\id);
+        \draw [-] (b\id) edge (J);
+    }
+    \node [block](NR) at (2.5, 2) {NR};
+    \node [block](I) at (2.5, 3){$I_3(x_\text{B})u_l$};
+    \draw[dashed] (0, 4) -- (5, 4);
+    \foreach \id in {1,...,4}
+    {
+        \node [circle, draw=black, fill=white, inner sep=0pt,minimum size=5pt](c\id) at (\id, 4) {};
+        \node [circle, fill=black, inner sep=0pt,minimum size=2pt](d\id) at (\id, 3.6) {};
+        \draw [-] (c\id) -- (d\id);
+        \draw [->] (d\id) edge (I);
+    }
+    \node(x) at (2.7, 4) {$\times$};
+    \node(x) at (2.7, 0) {$\times$};
+    \node(xb) at (2.7, 4.25) {$x_\text{B}$};
+    \draw [->] (I) edge (NR);
+    \draw [->] (NR) edge (J);
     
-% \end{tikzpicture} 
-%     \caption{\it Cubic interpolation at bowing point $x_\text{B}$. The interpolator $I$ retrieves the values of four grid points which are then used in the Newton Raphson (NR) solver. This outputs the force function $f(v,z)$ that the spreading function $J$ in turn distributes over the same four grid points.}
-%     \label{fig:interpol}
-% \end{figure}
+\end{tikzpicture} 
+    \caption{\it Cubic interpolation at bowing point $x_\text{B}$. The interpolator $I$ retrieves the values of four grid points which are then used in the Newton Raphson (NR) solver. This outputs the force function $f(v,z)$ that the spreading function $J$ in turn distributes over the same four grid points.}
+    \label{fig:interpol}
+\end{figure}
 
 At the bowing point we need to iteratively solve for two unknown variables: the relative velocity between the bow and the string $v$ and the mean bristle displacement $z$ of the bow.
 We can solve \eqref{eq:FDS} at $x_\text{B}^n$ using \eqref{eq:discRelVel} and identity \cite{Bilbao2009}
@@ -558,32 +557,33 @@ and are based on implementations by Serafin in \cite{Serafin2004} and can be fou
 
 \section{Results}\label{sec:results}
 For testing, a MacBook Pro with a 2.2 GHz Intel Core i7 processor has been used. 
-% \begin{figure}[h]
-%   \centering
-%   \begin{tikzpicture}[->,node distance=3cm,
-%     thick,main node/.style={circle,draw}]
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[->,node distance=3cm,
+    thick,main node/.style={circle,draw}]
 
-%     \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{hysteresis.eps}};
-%     % \filldraw[black] (arr2B) (2,2) circle (1pt) node[anchor=center](topZ){};
-%     % \filldraw[black] (arr2E) (3,1.5) circle (1pt) node[anchor=center](topZ){};
-%     % (arr2B) edge[bend right] node [arrow] {} (arr2E);
+    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{hysteresis.eps}};
+    % \filldraw[black] (arr2B) (2,2) circle (1pt) node[anchor=center](topZ){};
+    % \filldraw[black] (arr2E) (3,1.5) circle (1pt) node[anchor=center](topZ){};
+    % (arr2B) edge[bend right] node [arrow] {} (arr2E);
     
-%   \node (arr1B) at (2.3, 3.9) {};
-%   \node (arr1E) at (1.1, 2.6) {};
-%   \node (arr2B) at (2.8, 1.6) {};
-%   \node (arr2E) at (5, 0.6) {};
-%   \node (arr3B) at (7.7, 2.5) {};
-%   \node (arr3E) at (6.9, 2.75) {};
-%   \path[every node/.style={font=\sffamily\small}]
+  \node (arr1B) at (2.3, 3.9) {};
+  \node (arr1E) at (1.1, 2.6) {};
+  \node (arr2B) at (2.8, 1.6) {};
+  \node (arr2E) at (5, 0.6) {};
+  \node (arr3B) at (7.7, 2.5) {};
+  \node (arr3E) at (6.9, 2.75) {};
+  \path[every node/.style={font=\sffamily\small}]
 
-%     (arr1B) edge[bend right = 15] node [left] {} (arr1E)
-%     (arr2B) edge[bend right = 15] node [left] {} (arr2E)
-%     (arr3B) edge[bend right = 50] node [left] {} (arr3E);
-%     % \begin{scope}[x={(image.south east)},y={(image.north west)}]
-%     %     \draw[red,ultra thick,rounded corners] (0.62,0.65) rectangle (0.78,0.75);
-%     % \end{scope}
-%   \end{tikzpicture}
-% \end{figure}
+    (arr1B) edge[bend right = 15] node [left] {} (arr1E)
+    (arr2B) edge[bend right = 15] node [left] {} (arr2E)
+    (arr3B) edge[bend right = 50] node [left] {} (arr3E);
+    % \begin{scope}[x={(image.south east)},y={(image.north west)}]
+    %     \draw[red,ultra thick,rounded corners] (0.62,0.65) rectangle (0.78,0.75);
+    % \end{scope}
+  \end{tikzpicture}
+  \caption{\it Hysteresis loop.\label{fig:hysteresis}}
+\end{figure}
 
 
 $<5\%$ CPU usage. 
