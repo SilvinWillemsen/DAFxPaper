@@ -163,13 +163,13 @@ This paper describes the a real-time implementation of the elasto-plastic fricti
 
 \section{Introduction}
 \label{sec:intro}
-In the field of physical modelling for sound synthesis, the implementation of the bowed string is a challenging endeavour. This is mainly due to the non-linear relationship between the bow and the string, the friction. Friction models that describe this relationship can be subdivided into static and dynamic models, the latter of which has only seen major developments in the last two decades. As opposed to static friction models, dynamic models describe the friction force through a differential equations and exhibit hysteresis loops in the force vs. velocity plane.
+In physical modelling sound synthesis applications, the simulation of the bowed string is a challenging endeavour. This is mainly due to the atrongly non-linear relationship between the bow and the string, through a model of friction. Such friction models can be categorized as static or dynamic models, the latter type of which has only recently seen major developments. As opposed to static friction models, with a fixed force/velocity characteristic, dynamic models describe the friction force through a differential equation model and exhibit hysteresis loops in the force vs. velocity plane.
 
-Most friction models are calculated as a function of the relative velocity between the bow and the string only. In \cite{Woodhouse2003}, Woodhouse proposed a thermal friction model that added the temperature of the rosin as an extra dependency for the friction force. A more general model is the elasto-plastic model, as first proposed in \cite{Dupont2002} by Dupont et al. It assumes that the friction between the bow and the string is caused by a large quantity of bristles, each of which contributes to the total amount of friction. The bristle deflection is used as an extra independent variable for calculating the friction force. Still today, the elasto-plastic model is considered one of the most accurate friction models [source]. 
+Most friction models are posed n terms of the relative velocity between the bow and the string only. In \cite{Woodhouse2003}, Woodhouse proposed a thermal friction model that added the temperature of the rosin as an extra dependency for the friction force. A more general model is the elasto-plastic model, as first proposed in \cite{Dupont2002} by Dupont et al. It assumes that the friction between the bow and the string is caused by a large ensemble of bristles, each of which contributes to the total friction force. The average bristle deflection is used as an extra independent variable for calculating the friction force. Still today, the elasto-plastic model is considered one of the most accurate friction models [source]. 
 
 The first simulations of different non-linear oscillators, including bowed strings, were presented by McIntyre, et al. in \cite{McIntyre1983}. Based on this, Smith published the first real-time implementation of the bowed string using digital waveguides for the string and a look-up table for the friction model in \cite{Smith1986}. Simultaneously, Florens, et al. published a real-time implementation using mass-spring systems for the string and a static friction model for the bow in \cite{Florens1986}.
 
-Partial differential equations are well known to mathematically and accurately describe the behaviour of musical instruments. Considered to approximate these equations most accurately (especially in the case of non-linear systems) are finite-difference time-domain (FDTD) methods \cite{Bilbao2009, Bilbao2018}. In \cite{Maestre2014} the authors adapted the aforementioned thermal model to work in real-time using digital waveguides (DW) for the string implementation and a combination of DW and FDTD methods for the bowing interaction. In \cite{Desvages2017}, Desvages used FDTD methods for the implementation of the string and the static double exponential friction model introduced in \cite{Smith2000}, which was, however, not implemented in real-time. To the best of the authors' knowledge, the only known real-time implementation of any bow model applied to to FDTD strings was presented in \cite{Willemsen2019} where the soft exponential friction function presented in \cite{Bilbao2009} was used. The current work can be considered an extension on this.
+More generally, partial differential equations models are well known to mathematically and accurately describe the behaviour of musical instruments---specialised synthesis methods such as digital waveguides are derived from particular solutions. Considered to approximate these equations most accurately (especially in the case of non-linear systems) are finite-difference time-domain (FDTD) methods \cite{Bilbao2009, Bilbao2018}. In \cite{Maestre2014} the authors adapted the aforementioned thermal model to work in real-time using digital waveguides (DW) for the string implementation and a combination of DW and FDTD methods for the bowing interaction. In \cite{Desvages2017}, Desvages used FDTD methods for the implementation of the string and the static double exponential friction model introduced in \cite{Smith2000}, which was, however, not implemented in real-time. To the best of the authors' knowledge, the only known real-time implementation of any bow model applied to to FDTD strings was presented in \cite{Willemsen2019} where the soft exponential friction function presented in \cite{Bilbao2009} was used. The current work can be considered an extension on this.
 
 We are interested to bridge the gap between highly accurate physical models and efficient implementation so that these models can be played in real-time. In this work, we present an implementation of the elasto-plastic friction model applied as an external force to a finite-difference implementation of the damped stiff string. Furthermore, we show that it is possible to play the string in real-time using the Sensel Morph controller \cite{Sensel2019}.
 
@@ -348,8 +348,7 @@ As mentioned, the elasto-plastic bow model assumes that the friction between the
         u_{tt} = \hdots - \delta(x-x_\text{B})f(v, z)/\rho A,
     \end{aligned}
 \end{equation}
-
-\SWcomment[Alright, I guess this works now :) ] with spatial Dirac delta function $\delta(x-x_\text{B})$ applying the bowing function $f$ at bowing position $x_\text{B}$. The bowing function is dependent on the relative velocity between the string at the bowing point and the bow
+with spatial Dirac delta function $\delta(x-x_\text{B})$ applying the bowing function $f$ at bowing position $x_\text{B}$. The bowing function is dependent on the relative velocity between the string at the bowing point and the bow
 \begin{equation}\label{eq:relVel}
   v = u_t(x_\text{B}) - v_\text{B}
 \end{equation}
@@ -357,16 +356,16 @@ and the aforementioned average bristle displacement $z$. In the following we wil
 \begin{equation}\label{eq:forceFunction}
     f(v, z) = s_0z + s_1\dot z + s_2v
 \end{equation}
-where $s_0$ is the bristle stiffness (in N/m), $s_1$ is the damping coefficient (in N$\cdot$ s/m) and $s_2$ is the viscous friction (in N$\cdot$ s/m).
+where $s_0$ is the bristle stiffness (in N/m), $s_1$ is the damping coefficient (in N$\cdot$s/m) and $s_2$ is the viscous friction (in N$\cdot$s/m).
 Moreover, the rate of change of $z$ is related to $v$ through
 \begin{equation}\label{eq:zdot}
     \dot z(v, z) = v \bigg[ 1-  \alpha(v, z)\frac{z}{z_\text{ss}(v)}\bigg ]
 \end{equation}
-where $\dot{z}$ indicates an ordinary time derivative of $$$z_\text{ss}$ is the steady-state function
+where $\dot{z}$ indicates an ordinary time derivative of $z$, and $z_\text{ss}$ is the steady-state function
 \begin{equation}
     z_\text{ss}(v) = \frac{\sgn(v)}{s_0}\Big[f_\text{c}+(f_\text{s}-f_\text{c})e^{-(v/v_\text{s})^2}\Big].
 \end{equation}
-with Stribeck velocity $v_\text{s}$ (in m/s), coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. 
+with Stribeck velocity $v_\text{s}$ (in m/s), coulomb force $f_\text{c} = f_\text{N}\mu_\text{c}$ and stiction force $f_\text{s} = f_\text{N}\mu_\text{s}$ (both in N). Here $f_\text{N}$ is the normal force (in N) and $\mu_\text{c}$ and $\mu_\text{s}$ are the dynamic and static friction coefficient respectively. \SBcomment[is $f_{N}$ an externally supplied signal?]\SWcomment[In the C++ case, yes. In the Matlab case it will be set to a value between 1 and 100 N. ]\SBcomment[OK, i guess I meant that you could point out that $f_{N}$ and $v_{B}$ have to be supplied externally---they aren't unknowns to be solved for.]\SWcomment[Ah I see. I'll add that :)]
 Furthermore, the adhesion map between the bow and the string is defined as
 \begin{equation}\label{eq:adhesionMap}
 \alpha(v, z) 
@@ -386,9 +385,7 @@ where the transition between the elastic and plastic behaviour is defined as
 \begin{equation}\label{eq:alphaM}
     \alpha_\text{m} = \frac{1}{2}\bigg[1+\sgn(z)\sin\bigg(\pi\frac{z-\sgn(z)\frac{1}{2}(|z_\text{ss}(v)|+z_\text{ba})}{|z_\text{ss}(v)|-z_\text{ba}}\bigg)\bigg],
 \end{equation}
-with break-away displacement $z_\text{ba}$, i.e. where the bristles start to break, as mentioned at the beginning of this section. A visualisation of the adhesion map can be found in Figure \ref{fig:alphaPlot}. 
-
-Interesting to note is that in the literature on this topic, several errors can be found in the definition of $\alpha(v,z)$: 1) all uses of $z_\text{ss}$ in \eqref{eq:adhesionMap} and \eqref{eq:alphaM} lack the absolute value operator, 2) the multiplications with $\sgn(z)$ in \eqref{eq:alphaM} are excluded, 3) $\alpha(v,z)$ is undefined for $|z|=z_\text{ba}$ and $|z|=|z_\text{ss}(v)|$. It can be shown that only with the definitions presented here, is it possible to obtain the curve shown in Figure \ref{fig:alphaPlot}. \textbf{<- maybe this paragraph is a little too pretentious haha}
+with break-away displacement $z_\text{ba}$, i.e. where the bristles start to break, as mentioned at the beginning of this section. A visualisation of the adhesion map can be found in Figure \ref{fig:alphaPlot}.\footnote{Interesting to note is that in the literature on this topic, several errors can be found in the definition of $\alpha(v,z)$: 1) all uses of $z_\text{ss}$ in \eqref{eq:adhesionMap} and \eqref{eq:alphaM} lack the absolute value operator, 2) the multiplications with $\sgn(z)$ in \eqref{eq:alphaM} are excluded, 3) $\alpha(v,z)$ is undefined for $|z|=z_\text{ba}$ and $|z|=|z_\text{ss}(v)|$. It can be shown that only with the definitions presented here, is it possible to obtain the curve shown in Figure \ref{fig:alphaPlot}.} \SWcomment[<- maybe this paragraph is a little too pretentious haha ]\SBcomment[Yes, maybe it will piss off the reviewers]\SWcomment[Haha, so I thought.. I'll talk to Stefania about how to make this a little more professional. ]\SBcomment[This would be a good thing to put in a footnote.]
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{untitled.eps}}
@@ -517,7 +514,7 @@ where
 \begin{equation}\label{eq:derivativeG}
     g'(\dot z^i) = -\frac{s_1}{s_2+\frac{2}{k} + 2\sigma_0}\frac{dg(\dot z^i)}{dv} + \frac{k}{2}\frac{dg(\dot z^i)}{dz} - 1.
 \end{equation}
-In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
+\SWcomment[Stefan, I was wondering if this was correct, specifically the coefficient that is multiplied onto $\frac{dg(\dot z^i)}{dv}$. With the K-method Stefania uses, $\frac{dg(\dot z^i)}{dz}$ is multiplied with $\frac{k}{2}$ which I concluded to be due to the multiplication of $\frac{k}{2}$ with $\dot z$ in \eqref{eq:trapRule}. In that line of thought I did the same for \eqref{eq:velCalc}, but I'm not sure if that's correct. Do you have an idea?] In the iteration, we use the newly calculated value for $\dot z$ and the values of $z$ and $\dot z$ at the previous time step to calculate an estimate of $z$ using the trapezoidal rule
 \begin{equation}\label{eq:trapRule}
     z^n = z^{n-1} + \frac{k}{2}(\dot z^{i+1} + \dot z^{n-1}).
 \end{equation}
@@ -561,10 +558,32 @@ and are based on implementations by Serafin in \cite{Serafin2004} and can be fou
 
 \section{Results}\label{sec:results}
 For testing, a MacBook Pro with a 2.2 GHz Intel Core i7 processor has been used. 
-\begin{figure}[ht]
-\centerline{\includegraphics[width=1.0\columnwidth]{hysteresis.eps}}
-\caption{\label{fig:hysteresis}Hysteresis loop.}
-\end{figure}
+% \begin{figure}[h]
+%   \centering
+%   \begin{tikzpicture}[->,node distance=3cm,
+%     thick,main node/.style={circle,draw}]
+
+%     \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{hysteresis.eps}};
+%     % \filldraw[black] (arr2B) (2,2) circle (1pt) node[anchor=center](topZ){};
+%     % \filldraw[black] (arr2E) (3,1.5) circle (1pt) node[anchor=center](topZ){};
+%     % (arr2B) edge[bend right] node [arrow] {} (arr2E);
+    
+%   \node (arr1B) at (2.3, 3.9) {};
+%   \node (arr1E) at (1.1, 2.6) {};
+%   \node (arr2B) at (2.8, 1.6) {};
+%   \node (arr2E) at (5, 0.6) {};
+%   \node (arr3B) at (7.7, 2.5) {};
+%   \node (arr3E) at (6.9, 2.75) {};
+%   \path[every node/.style={font=\sffamily\small}]
+
+%     (arr1B) edge[bend right = 15] node [left] {} (arr1E)
+%     (arr2B) edge[bend right = 15] node [left] {} (arr2E)
+%     (arr3B) edge[bend right = 50] node [left] {} (arr3E);
+%     % \begin{scope}[x={(image.south east)},y={(image.north west)}]
+%     %     \draw[red,ultra thick,rounded corners] (0.62,0.65) rectangle (0.78,0.75);
+%     % \end{scope}
+%   \end{tikzpicture}
+% \end{figure}
 
 
 $<5\%$ CPU usage. 
