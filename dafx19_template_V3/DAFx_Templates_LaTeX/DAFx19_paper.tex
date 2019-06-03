@@ -150,8 +150,8 @@
 %-------------------------------------FOUR-AUTHOR HEADER ENDS------------------------------------------------------
 
 \usepackage{xcolor}
-\def\SBcomment[#1]{\textcolor{Red}{}}
-\def\SWcomment[#1]{\textcolor{Green}{}}
+\def\SBcomment[#1]{\textcolor{Red}{#1}}
+\def\SWcomment[#1]{\textcolor{Green}{#1}}
 
 \begin{document}
 % more pdf-tex settings:
@@ -164,7 +164,7 @@
 \maketitle
     
 \begin{abstract}
-The simulation of a bowed string is challenging due to the strongly non-linear relationship between the bow and the string. This relationship can be described through a model of friction. Several friction models in the literature have been proposed, from simple velocity dependent to more accurate ones. Similarily, a highly accurate technique to simulate a stiff string is the use of finite-difference schemes (FDSs). As accuracy implies computational complexity, implementation of these models in real-time is assumed to be a challenge. This paper presents a real-time implementation of the novel combination of a complex friction model, namely the elasto-plastic friction model, and the stiff string simulated using FDSs. We show that it is possible to keep the CPU usage of a single bowed string $<5\%$. For real-time control of the bowed string, the Sensel Morph is used. 
+The simulation of a bowed string is challenging due to the strongly non-linear relationship between the bow and the string. This relationship can be described through a model of friction. Several friction models in the literature have been proposed, from simple velocity dependent to more accurate ones. Similarly, a highly accurate technique to simulate a stiff string is the use of finite-difference schemes (FDSs). As accuracy implies computational complexity, implementation of these models in real-time is assumed to be a challenge. This paper presents a real-time implementation of the novel combination of a complex friction model, namely the elasto-plastic friction model, and the stiff string simulated using FDSs. We show that it is possible to keep the CPU usage of a single bowed string $<5\%$. For real-time control of the bowed string, the Sensel Morph is used. 
 \end{abstract}
 \section{Introduction}
 \label{sec:intro}
@@ -182,7 +182,7 @@ This paper is structured as follows. In Section \ref{sec:elasto}, the elasto-pla
 
 \section{Elasto-Plastic Bow Model}\label{sec:elasto}
 
-Consider a linear model of transverse string vibration in a single polarization, where $u(x,t)$ represents string displacement as a function of time $t\geq 0$, in s, and coordinate $x\in[0,\,L]$ (in m) for some string length $L$ (in m). Using the subscripts $t$ and $x$ to denote differentiation with respect to time and space respectively, a partial differential equation describing the dynamics of the damped stiff string is: \cite{Bilbao2009}
+Consider a linear model of transverse string vibration in a single polarization, where $u(x,t)$ represents string displacement as a function of time $t\geq 0$, in s, and coordinate $x\in[0,\,L]$ (in m) for some string length $L$ (in m). Using the subscripts $t$ and $x$ to denote differentiation with respect to time and space respectively, a partial differential equation describing the dynamics of the damped stiff string is \cite{Bilbao2009}:
 \begin{equation}\label{eq:PDE}
     u_{tt} = c^2u_{xx}-\kappa^2u_{xxxx}-2\sigma_0u_t+2\sigma_1u_{txx},
 \end{equation}
@@ -579,7 +579,7 @@ In this section, we will elaborate on the implementation; the parameters used an
     Bristle damping & $s_1$ & $0.1\sqrt{s_0}$ & \\
     Viscous friction & $s_2$ & $0.4$ & \\
     Noise coefficient & $s_3$ & $0.05f_\text{N}$ & \\
-    Pseudorandom func. & $w$ & $-5<w<5$ & \\
+    Pseudorandom func. & $w$ & $-1<w<1$ & \\
     Break-away disp.& $z_\text{ba}$ & $0.7 f_\text{C}/s_0$ & $<f_\text{C}/s_0$ \\
     Time step & $k$ & $1/f_\text{s}$ & \\
     NR threshold & $\epsilon$ & $10^{-7}$ & \\
@@ -731,7 +731,7 @@ I_3(x_\text{B}) =
     \hfil 0, & l > l_\text{B} + 2
     \end{cases}
     \end{equation}
-Similarily, the spreading operator $J$ can be defined as linear:
+Similarly, the spreading operator $J$ can be defined as linear:
 \begin{equation}\label{eq:linearSpreading}
      J_1(x_\text{B}) = \frac{1}{h}
      \begin{cases}
