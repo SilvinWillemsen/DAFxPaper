@@ -56,11 +56,15 @@
 \usepackage[T1]{fontenc}
 \usepackage{ifpdf}
 \usepackage{scalerel}
-
+\usepackage[]{algorithm2e, setspace}
+\usepackage{multicol}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
 \usepackage[english]{babel}
 \usepackage{caption}
 \usepackage{subfig} % or can use subcaption package
 \usepackage{color}
+\usepackage{diagbox}
+\usepackage{multirow}
 \newenvironment{rcases}
   {\left.\begin{alignedat}{2}}
   {\end{alignedat}\right\rbrace}
@@ -164,19 +168,21 @@
 \maketitle
     
 \begin{abstract}
-The simulation of a bowed string is challenging due to the strongly non-linear relationship between the bow and the string. This relationship can be described through a model of friction. Several friction models in the literature have been proposed, from simple velocity dependent to more accurate ones. Similarly, a highly accurate technique to simulate a stiff string is the use of finite-difference time-domain (FDTD) methods. As these models are generally computationally heavy, implementation in real-time is challenging. \SWcomment[<- better like this?]{} This paper presents a real-time implementation of the \SWcomment[novel]{} combination of a complex friction model, namely the elasto-plastic friction model, and the stiff string simulated using FDTD methods. We show that it is possible to keep the CPU usage of a single bowed string below 5 percent. For real-time control of the bowed string, the Sensel Morph is used. 
+The simulation of a bowed string is challenging due to the strongly non-linear relationship between the bow and the string. This relationship can be described through a model of friction. Several friction models in the literature have been proposed, from simple velocity dependent to more accurate ones. Similarly, a highly accurate technique to simulate a stiff string is the use of finite-difference time-domain (FDTD) methods. As these models are generally computationally heavy, implementation in real-time is challenging. This paper presents the combination of a complex friction model, namely the elasto-plastic friction model, and a stiff string simulated using FDTD methods. We show that it is possible to keep the CPU usage of a single bowed string below 5 percent. For real-time control of the bowed string, the Sensel Morph is used.
 \end{abstract}
 \section{Introduction}
 \label{sec:intro}
-In physical modelling sound synthesis applications, the simulation of the bowed string is a challenging endeavour. This is mainly due to the strongly non-linear relationship between the bow and the string, through a model of friction. Such friction models can be categorized as static or dynamic; models of the latter type have only recently seen a major effort. As opposed to static friction models, where friction depends only on the relative velocity of the two bodies in contact, dynamic models describe the friction force through a differential equation.
+In physical modelling sound synthesis applications, the simulation of a bowed string is a challenging endeavour. This is mainly due to the strongly non-linear relationship between the bow and the string, through a model of friction. Such friction models can be categorised as static or dynamic; models of the latter type have only recently seen a major effort. As opposed to static friction models, where friction depends only on the relative velocity of the two bodies in contact, dynamic models describe the friction force through a differential equation.
 
-Most friction models are posed in terms of the relative velocity between the bow and the string only. A generalisation is the elasto-plastic model, as first proposed in \cite{Dupont2002} by Dupont et al. It assumes that the friction between the bow and the string is caused by a large ensemble of bristles, each of which contributes to the total friction force. The average bristle deflection is used as an extra independent variable for calculating the friction force, and, as shown in \cite{Serafin2003}, the elasto-plastic model exhibits a hysteresis loop in the force vs. velocity plane due to this multivariable dependency. \SWcomment[Stefania, should I cite woodhouse "Tribology of Rosin" here for experimental measurements of hysteresis loops?]{} The elasto-plastic model has been thoroughly investigated in a musical context by Serafin et al. in \cite{Serafin2003, Serafin2004, Avanzini2005}. 
+ A recently popular dynamic model is the elasto-plastic model, first proposed in \cite{Dupont2002}. The model assumes that the friction between the two objects in contact is caused by a large ensemble of bristles, each of which contributes to the total friction force. The average bristle deflection is used as an extra independent variable for calculating the friction force. As shown in \cite{Serafin2003}, the elasto-plastic model can be applied to a bowed string simulation and it exhibits a hysteresis loop in the force versus velocity plane due to this multivariable dependency.
+ This is consistent with recent measurement performed using a bowing machine in \cite{Woodhouse2003}.
+ The elasto-plastic model has been thoroughly investigated in a musical context by Serafin et al. in \cite{Serafin2003, Serafin2004, Avanzini2005}. 
 
-The first simulations of musical non-linear systems, including bowed strings, were presented by McIntyre, et al. in \cite{McIntyre1983}. Smith published the first real-time implementation of the bowed string using a digital waveguide (DW) for the string and a look-up table for the friction model in \cite{Smith1986}. Simultaneously, Florens, et al. published a real-time implementation using mass-spring systems for the string and a static friction model for the bow in \cite{Florens1986}. 
+Regarding bowed string simulations, the first musical non-linear systems, including bowed strings, were presented by McIntyre, et al. in \cite{McIntyre1983}. Smith published the first real-time implementation of the bowed string using a digital waveguide (DW) for the string and a look-up table for the friction model in \cite{Smith1986}. Simultaneously, Florens, et al. published a real-time implementation using mass-spring systems for the string and a static friction model for the bow in \cite{Florens1986}. 
 
-The dynamics of musical instruments are generally described by systems of  partial differential equations (PDEs)---specialised synthesis methods such as DWs \cite{Smith1992} and modal synthesis \cite{Morrison1993} are derived from particular solutions.  Mainstream time-stepping methods such as finite-difference time-domain (FDTD) methods were first proposed in \cite{Hiller, Hiller2, Chaigne}, and developed subsequently \cite{Bilbao2009, Bilbao2018}. In \cite{Maestre2014} the authors adapted the thermal model due to Woodhouse \cite{Woodhouse2003} for real-time applications using a DW for the string implementation and a combination of the DW and FDTD methods for the bowing interaction. In \cite{Desvages2017, Desvages2015}, Desvages used FDTD methods for the implementation of the string in two polarizations and the static double exponential friction model introduced in \cite{Smith2000}. This was, however, not implemented in real-time. To the best of the authors' knowledge, the only known real-time implementation of any bow model applied to FDTD strings was presented in \cite{Willemsen2019} where the soft exponential friction function presented in \cite{Bilbao2009} was used. The current work can be considered an extension of this work.
+The dynamics of musical instruments are generally described by systems of  partial differential equations (PDEs). Specialised synthesis methods such as DWs \cite{Smith1992} and modal synthesis \cite{Morrison1993} are derived from particular solutions.  Mainstream time-stepping methods such as finite-difference time-domain (FDTD) methods were first proposed in \cite{Hiller, Hiller2, Chaigne}, and developed subsequently \cite{Bilbao2009, Bilbao2018}. In \cite{Maestre2014} the authors adapted the thermal model proposed by Woodhouse \cite{Woodhouse2003} for real-time applications using a DW for the string implementation and a combination of the DW and FDTD methods for the bowing interaction. In \cite{Desvages2017, Desvages2015}, Desvages used FDTD methods for the implementation of the string in two polarizations and a static double exponential friction model introduced in \cite{Smith2000}. This was, however, not implemented in real-time. To the best of the authors' knowledge, the only known real-time implementation of any bow model applied to complete FDTD strings was presented in \cite{Willemsen2019} where the soft exponential friction function presented in \cite{Bilbao2009} was used. The current work can be considered an extension of this work.
 
-We are interested in bridging the gap between highly accurate physical models and efficient implementation so that these models can be played in real-time. In this work, we present an implementation of the elasto-plastic friction model in conjunction with a finite-difference implementation of the damped stiff string. Furthermore, we show that it is possible to play the string in real-time using the Sensel Morph controller \cite{Sensel2019}.
+We are interested in bridging the gap between highly accurate physical models and efficient implementations so that these models can be played in real-time. In this work, we present an implementation of the elasto-plastic friction model in conjunction with a finite-difference implementation of the damped stiff string. Furthermore, we show that it is possible to play the string in real-time using the Sensel Morph controller \cite{Sensel2019}.
 
 This paper is structured as follows. In Section \ref{sec:elasto}, the elasto-plastic bow model in conjunction with a PDE model for a stiff string is described. Discretisation is covered in Section \ref{sec:discretisation}, and implementation details appear in Section \ref{sec:implementation}. In Section \ref{sec:results}, simulated results are presented and discussed. Some concluding remarks appear in Section  \ref{sec:conclusion}.
 
@@ -186,7 +192,9 @@ Consider a linear model of transverse string vibration in a single polarization,
 \begin{equation}\label{eq:PDE}
     u_{tt} = c^2u_{xx}-\kappa^2u_{xxxx}-2\sigma_0u_t+2\sigma_1u_{txx}.
 \end{equation}
-Here $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$). Furthermore, $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in m$^2$/s) with Young's Modulus $E$ (in Pa), area moment of inertia $I$ (in m$^4$). For a string of circular cross section we have radius $r$, cross-sectional area $A=\pi r^2$ and area moment of inertia $I=\pi r^4 /4$.  Lastly, $\sigma_0 \geq 0$ (in s$^{-1}$) and $\sigma_1 \geq 0$ (in m$^2$/s) \SWcomment[these units for the damping coefs are correct, right?] are coefficients allowing for frequency-independent and frequency-dependent damping respectively. 
+Here $c = \sqrt{T/\rho A}$ is the wave speed (in m/s) with tension $T$ (in N), material density $\rho$ (in kg$\cdot$m$^{-3}$) and cross-sectional area $A$ (in m$^2$). Furthermore, $\kappa = \sqrt{EI/\rho A}$ is the stiffness coefficient (in m$^2$/s) with Young's Modulus $E$ (in Pa), area moment of inertia $I$ (in m$^4$). For a string of circular cross section we have radius $r$, cross-sectional area $A=\pi r^2$ and area moment of inertia $I=\pi r^4 /4$.  Lastly, $\sigma_0 \geq 0$ (in s$^{-1}$) and $\sigma_1 \geq 0$ (in m$^2$/s) 
+%\SWcomment[these units for the damping coefs are correct, right?] 
+are coefficients allowing for frequency-independent and frequency-dependent damping respectively. 
 
 In our implementation we assume simply supported boundary conditions, which are defined as
 \begin{equation}
@@ -354,17 +362,20 @@ As mentioned in the introduction, the elasto-plastic bow model assumes that the 
         u_{tt} = \hdots - \delta(x-x_\text{B})f(v, z)/\rho A.
     \end{aligned}
 \end{equation}
-Here, the spatial Dirac delta function $\delta(x-x_\text{B})$ allows for the pointwise application of the force $f$ at externally supplied bowing position $x_\text{B}(t)$. The force $f$ is dependent on the relative velocity $v$ between the string at the bowing point and the bow itself, defined as
-\begin{equation}\label{eq:relVel}
-  v = u_t(x_\text{B}) - v_\text{B},
-\end{equation}
-where $v_\text{B}(t)$ is an externally supplied bow velocity. In the following we will use the definitions found in \cite{Dupont2002}. The force $f$ is defined in terms of the relative velocity $v$ and average bristle displacement $z$ (see Figure \ref{fig:elastoPlastic}) as
+Here, the spatial Dirac delta function $\delta(x-x_\text{B})$ allows for the pointwise application of the force $f$ at externally supplied bowing position $x_\text{B}(t)$. 
+
+%The force $f$ is dependent on the relative velocity $v$ between the string at the bowing point and the bow itself, %defined as
+ In the following we will use the definitions found in \cite{Dupont2002}. The force $f$ is defined in terms of the relative velocity $v$ and average bristle displacement $z$ (see Figure \ref{fig:elastoPlastic}) as
 \begin{equation}\label{eq:forceFunction}
     f(v, z) = s_0z + s_1\dot z + s_2v + s_3w,
 \end{equation}
-where $s_0$ is the bristle stiffness (in N/m), $s_1$ is the damping coefficient (in kg/s), $s_2$ is the viscous friction (in kg/s) and $s_3$ is a dimensionless noise coefficient multiplied onto pseudorandom function $w(t)$ (in N) as done in \cite{Serafin2004} and adds noise to the friction force. Here, $\dot{z}$ indicates a time derivative of $z$, and is related to $v$ through
+where \begin{equation}\label{eq:relVel}
+  v = u_t(x_\text{B}) - v_\text{B},
+\end{equation}
+where $v_\text{B}(t)$ is an externally supplied bow velocity,
+$s_0$ is the bristle stiffness (in N/m), $s_1$ is the damping coefficient (in kg/s), $s_2$ is the viscous friction (in kg/s) and $s_3$ is a dimensionless noise coefficient multiplied onto pseudorandom function $w(t)$ (in N) as done in \cite{Serafin2004} and adds noise to the friction force. Here, $\dot{z}$ indicates a time derivative of $z$, and is related to $v$ through
 \begin{equation}\label{eq:zdot}
-    \dot z(v, z) = v \bigg[ 1-  \alpha(v, z)\frac{z}{z_\text{ss}(v)}\bigg],
+    \dot z = r(v, z) = v \bigg[ 1-  \alpha(v, z)\frac{z}{z_\text{ss}(v)}\bigg],
 \end{equation}
 where $z_\text{ss}$ is the steady-state function
 \begin{equation}\label{eq:zss}
@@ -374,7 +385,7 @@ with Stribeck velocity $v_\text{S}$ (in m/s), Coulomb force $f_\text{C} = f_\tex
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{steadyState.eps}}
-\caption{\label{fig:zss}{\it A plot of the steady-state function $z_\text{ss}(v)$.}}
+\caption{\label{fig:zss}{\it A plot of the steady-state function $z_\text{ss}(v)$ with a force of 10 N.}}
 \end{figure}
 Furthermore, the adhesion map between the bow and the string is defined as
 \begin{equation}\label{eq:adhesionMap}
@@ -396,6 +407,8 @@ where the transition between the elastic and plastic behaviour is defined as
     \alpha_\text{m} = \frac{1}{2}\bigg[1+\sgn(z)\sin\bigg(\pi\frac{z-\sgn(z)\frac{1}{2}(|z_\text{ss}(v)|+z_\text{ba})}{|z_\text{ss}(v)|-z_\text{ba}}\bigg)\bigg],
 \end{equation}
 with break-away displacement $z_\text{ba}$, i.e., where the bristles start to break (see Figure \ref{fig:elastoPlastic} c)). A plot of the adhesion map can be found in Figure \ref{fig:alphaPlot}.\footnote{It is interesting to note is that in the literature on this topic such as \cite{Dupont2002, Serafin2003, Serafin2004, Avanzini2005}, a few inaccuracies can be found in the definition of $\alpha(v,z)$: 1) all uses of $z_\text{ss}$ in \eqref{eq:adhesionMap} and \eqref{eq:alphaM} lack the absolute value operator, 2) the multiplications with $\sgn(z)$ in \eqref{eq:alphaM} are excluded, 3) $\alpha(v,z)$ is undefined for $|z|=z_\text{ba}$ and $|z|=|z_\text{ss}(v)|$ (correct in the original paper by Dupont et al. \cite{Dupont2002}). It can be shown that only with the definitions presented here, is it possible to obtain the curve shown in Figure \ref{fig:alphaPlot}.}
+
+One of the difficulties in working with this model is that, due to the many approximations, the notion of an energy balance, relating the rate of stored energy in the system to power input and loss is not readily available. Such energy methods are used frequently in the context of physical modeling synthesis and virtual analog modeling as a means of arriving at numerical stability conditions for strongly nonlinear systems, as is the present case. See, e.g., \cite{Bilbao2009}. This means that we do not have a means of ensuring numerical stability in the algorithm development that follows. This does not mean, however, that an energy balance is not available. 
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{drawAlpha.eps}}
@@ -431,7 +444,7 @@ Approximations for the derivatives found in \eqref{eq:PDE} are described in the 
         \end{aligned}
     \end{align}
 \end{subequations}
-with grid function $u_l^n$ denoting a discretised version of $u(x,t)$ at the $n$th time step and the $l$th point on the string. Using the approximations shown in \eqref{eq:approximations}, \eqref{eq:bowingTerm} can be discretised to
+with grid function $u_l^n$ denoting a discretised version of $u(x,t)$ at the $n$th time step and the $l$th point on the string. Note that in \eqref{eq:timeSpace}, the backwards time difference operator is used to keep \eqref{eq:FDS} explicit and thus computationally cheaper to update. Using the approximations shown in \eqref{eq:approximations}, \eqref{eq:bowingTerm} can be discretised to
 \begin{equation}
   \begin{aligned}
     \label{eq:FDS}
@@ -444,8 +457,16 @@ where the relative velocity described in \eqref{eq:relVel} can be discretised as
 \begin{equation}\label{eq:discRelVel}
 v^n = I(x_\text{B}^n)\delta_{t\cdot}u_l^n -  v_\text{B}^n.
 \end{equation}
-    Here, $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are weighting functions where the former interpolates the string displacement and velocity and the latter distributes the bowing term around time-varying bowing position $x_\text{B}^n$  \SWcomment[well explained?] (see Figure \ref{fig:interpol} and \cite{Bilbao2009}
-for more details on this). In \eqref{eq:timeSpace}, the backwards time difference operator is used to keep \eqref{eq:FDS} explicit and thus computationally cheaper to update.
+    Here, $I(x_\text{B}^n)$ and $J(x_\text{B}^n)$ are weighting functions where the former interpolates the string displacement and velocity and the latter distributes the bowing term around time-varying bowing position $x_\text{B}^n$ (see Figure \ref{fig:interpol} and \cite{Bilbao2009}
+for more details on this). Furthermore,
+\begin{equation}\label{eq:discForceFunction}
+    f(v^n,z^n) = s_0z^n + s_1r^n+s_2v^n+s_3w^n
+\end{equation} 
+is the discrete counterpart of \eqref{eq:forceFunction} where 
+\begin{equation}\label{eq:r}
+    r^n = r(v^n,z^n) = v^n\bigg[1-\alpha(v^n,z^n)\frac{z^n}{z_\text{ss}(v^n)}\bigg]
+\end{equation}
+is the discrete counterpart of \eqref{eq:zdot}.
 \begin{figure}[h]
     \centering
     \begin{tikzpicture}
@@ -502,11 +523,11 @@ resulting in
 %\end{aligned}
 %\end{equation}
 \begin{equation} \label{eq:incIdentity}
-    \Big(\frac{2}{k}+2\sigma_{0}\Big) v^n +b^n+I(x_\text{B}^n)J(x_\text{B}^n)f(v^n,z^n)/\rho A = 0,
+    I(x_\text{B}^n)J(x_\text{B}^n)f(v^n,z^n)/\rho A+\Big(\frac{2}{k}+2\sigma_{0}\Big) v^n+b^n = 0,
 \end{equation}
 % \SWcomment[or does this still need to be scaled by 1/h for it to be correctly solved in NR?]{}\SBcomment[Yes, you need the $1/h$...but (15) is only true if you use a pure spreading function selecting just one point...why not just do this? Otherwise you need to worry about the size of I*J. If you're moving the bow around, though, you definitely need this product though. ]
 where 
-\begin{equation}
+\begin{equation}\label{eq:bn}
         \begin{aligned}b^n =& \: \frac{2}{k}v_\text{B}^n-\frac{2}{k}I(x_\text{B}^n)\delta_{t-}u_l^n - c^2 I(x_\text{B}^n)\delta_{xx} u_l^n +\kappa^2I(x_\text{B}^n)\delta_{xxxx} u_l^n \\
     &+ 2\sigma_0v_\text{B}^n -2\sigma_1I(x_\text{B}^n)\delta_{t-}\delta_{xx}u_l^n
 \end{aligned}
@@ -515,9 +536,9 @@ and can be pre-computed as its terms are not dependent on $v$ or $z$. Recalling 
 \begin{equation}\label{eq:newtonFunction}
 \begin{aligned}
     % J(x_\text{B}^n)\Big(
-    &I(x_\text{B}^n)J(x_\text{B}^n)\Bigg(\frac{s_0z^n+s_1a^n+s_2v^n+s_3w^n}{\rho A}
+    &I(x_\text{B}^n)J(x_\text{B}^n)\Bigg(\frac{s_0z^n+s_1r^n+s_2v^n+s_3w^n}{\rho A}
     \Bigg)\\
-    &+ \Big(\frac{2}{k} + 2\sigma_0 \Big)v^n+ b^n= 0,
+    &+\Big(\frac{2}{k} + 2\sigma_0 \Big)v^n+ b^n= 0.
     \end{aligned}
 \end{equation}
 % \SWcomment[is it ok to interpret the spreading operator like this? Also, I could include the $s_3w$ in $b$ instead (as it is not dependent on $v$ or $z$) but then it would be confusing when using $J$ for spreading the force as $s_3w$ is also part of the force function in  \eqref{eq:forceFunction}.] \SBcomment[OK, I don't get why you need the spreading operator anymore...] \SWcomment[For the scaling by $1/h$, or don't I need this anymore here?] 
@@ -527,11 +548,6 @@ and can be pre-computed as its terms are not dependent on $v$ or $z$. Recalling 
 %     % \Big)
 %     + b\rho A = 0\end{equation}
 % \SWcomment[This is how I am trying to implement it now: first multiplying everything in \eqref{eq:incIdentity} by $\rho A$ and then solving this for $v$ in \eqref{eq:velCalc}.]
-where the discrete counterpart of $\dot{z}$ is denoted as \SWcomment[changed this to be backwards (t-)]{}
-\begin{equation}\label{eq:an}
-    a^n = (\mu_{t-})^{-1}\delta_{t-} z^n.
-\end{equation}
-Here the operators applied to $z^n$ denote the trapezoid rule \cite{Bilbao2009}.
 
 % Moreover,
 %     \begin{equation}
@@ -542,11 +558,15 @@ Here the operators applied to $z^n$ denote the trapezoid rule \cite{Bilbao2009}.
 % and can be pre-computed as its terms are not dependent on $v$ or $z$.
 
 To obtain the values of $v^n$ and $z^n$, multivariate Newton-Raphson (NR) is used. If \eqref{eq:newtonFunction} is defined to be $g_1  = g_1(v^n, z^n)$ and 
-\begin{equation}
-   g_2(v^n, z^n) = v^n\bigg[1-\alpha(v^n,z^n)\frac{z^n}{z_\text{ss}(v^n)}\bigg] - a^n = 0,
+\begin{equation}\label{eq:g2}
+   g_2(v^n, z^n) = r^n - a^n = 0,
 \end{equation}
-which is the discrete counterpart of \eqref{eq:zdot} minus \eqref{eq:an}, we obtain the following iteration 
-\begin{equation}
+with
+\begin{equation}\label{eq:an}
+    a^n = (\mu_{t-})^{-1}\delta_{t-} z^n
+\end{equation}
+(where the operators applied to $z^n$ denote the trapezoid rule \cite{Bilbao2009}) we obtain the following iteration 
+\begin{equation}\label{eq:NRit}
     \begin{bmatrix}
     v_{(i+1)}^n\\
     z_{(i+1)}^n
@@ -564,9 +584,10 @@ which is the discrete counterpart of \eqref{eq:zdot} minus \eqref{eq:an}, we obt
     \begin{bmatrix}
     g_1\\
     g_2
-    \end{bmatrix}\ ,
+    \end{bmatrix}\,
+    ,
 \end{equation}
-where $i$ is the iteration number capped by 50 iterations, and the convergence threshold is set to $10^{-7}$. 
+where $i$ is the iteration number capped by 50 iterations, and the convergence threshold is set to $10^{-7}$.
 % To obtain the values of $v$ and $z$ at sample $n$, an iterative solving method such as Newton-Raphson (NR) needs to be used and is defined as \cite{Wallis1685}
 % \begin{equation}
 %     y_{i+1} = y_{i} - \frac{g(y_i)}{g'(y_i)} \quad \text{while} \quad |y_{i+1}-y_i| > \phi
@@ -611,19 +632,22 @@ In this section, we will elaborate on the implementation; the parameters used an
     Parameter & Symb. (unit) & Value (notes)\\ \hline
     Material Density &$\rho$ (kg$\cdot$m$^{-3}$) & $7850$ \\
     Radius & $r$ (m) & $5\cdot10^{-4}$\\
-    Wave speed & $c$ (m/s) & $2 f_0/L$\\
     String length & $L$ (m) & $1$\\
-    Stiffness & $\kappa$ (m$^2$/s) & $2$\\
+    Wave speed & $c$ (m/s) & $2 f_0/L$\\
+    Young's modulus & $E$ (Pa) & $2\cdot 10^{11}$\\
     Freq. indep. damping & $\sigma_0$ (s$^{-1}$) & $1$\\
     Freq. dep. damping & $\sigma_1$ (m$^{2}$/s) & $5 \cdot 10^{-3}$\\
     Coulomb friction & $\mu_\text{C}$ (-) & $0.3$ ($<\mu_\text{S}$) \\
     Static friction & $\mu_\text{S}$ (-) & $0.8$ ($>\mu_\text{C}$) \\
+    Normal force & $f_\text{N}$ (N) & 10 \\
+    Bow velocity & $v_\text{B}$ (m/s) & 0.1 \\
+    Bow position & $x_\text{B}$ (m) & 0.25 \\
     Stribeck velocity & $v_\text{S}$ (m/s) & $0.1$ \\
     Bristle stiffness & $s_0$ (N/m)& $10^4$ \\
-    Bristle damping & $s_1$ (kg/s)& $0.1\sqrt{s_0}$ \\
+    Bristle damping & $s_1$ (kg/s)& $0.001\sqrt{s_0}$ \\
     Viscous friction & $s_2$ (kg/s) & $0.4$ \\
-    Noise coefficient & $s_3$ (-) & $0.05f_\text{N}$ \\
-    Pseudorandom func. & $w$ (N) & $-1<w<1$ \\
+    Noise coefficient & $s_3$ (-) & $0.05f_\text{N}$\\
+    Pseudorandom func. & $w$ (N) & $-1<w<1$\\
     Break-away disp.& $z_\text{ba}$ (m) & $0.7 f_\text{C}/s_0$ ($<f_\text{C}/s_0$) \\
     Time step & $k$ (s) & $1/f_\text{s}$ \\
     %NR threshold & $\phi$ (-) & $10^{-7}$ \\
@@ -632,7 +656,7 @@ In this section, we will elaborate on the implementation; the parameters used an
 	%
   \label{tab:parameters}
 \end{table}
-
+We use the passivity condition proposed by \cite{Astrom2008} for our choices of different parameter-values. As this condition applies to the LuGre model first proposed in \cite{Canudas1993, Canudas1995} from which the elasto-plastic model evolved, further investigation is required to conclude whether these conditions are identical for the elasto-plastic model.
 \subsection{Sensel Morph}
 As mentioned in Section \ref{sec:intro}, the Sensel Morph (or Sensel for short) is used as an interface to control the bowed string (see Figure \ref{fig:sensel}). The Sensel is a highly sensitive touch controller containing ca. 20,000 pressure sensitive sensors that allow for expressive control of the implementation \cite{Sensel2019}.
 \begin{figure}[ht]
@@ -641,7 +665,7 @@ As mentioned in Section \ref{sec:intro}, the Sensel Morph (or Sensel for short) 
 \end{figure}
 
 \subsection{Interaction}
-The first finger the Sensel registers is linked to the following parameters: the normal force of the bow $f_\text{N}$ (finger pressure), the bowing velocity $v_\text{B}$ (vertical finger velocity) and bowing position $x_\text{B}$ (horizontal finger position). The parameters are limited by the following conditions: $0 \leq f_\text{N} \leq 100$, $-0.2 \leq v_\text{B} \leq 0.2$ and $0<x_\text{B}<L$. The second finger acts as a stopping finger on the string. As done in \cite{Willemsen2019}, for a string stopped at location $x_\text{f}\in[0,L]$ and $l_\text{f}=\text{floor}(x_\text{f}/h)$ we use
+The first finger the Sensel registers is linked to the following parameters: the normal force of the bow $f_\text{N}$ (finger pressure), the bowing velocity $v_\text{B}$ (vertical finger velocity) and bowing position $x_\text{B}$ (horizontal finger position). The parameters are limited by the following conditions: $0 \leq f_\text{N} \leq 10$, $-0.3 \leq v_\text{B} \leq 0.3$ and $0<x_\text{B}<L$. The second finger acts as a stopping finger on the string. As done in \cite{Willemsen2019}, for a string stopped at location $x_\text{f}\in[0,L]$ and $l_\text{f}=\text{floor}(x_\text{f}/h)$ we use
 \begin{equation}
 u_l^n = 
     \begin{cases}
@@ -658,7 +682,7 @@ where $\alpha_\text{f} = x_\text{f} / h - l_\text{f}$ and $\epsilon = 7$ is a he
 \end{figure}
 
 \subsection{System Architecture}\label{sec:systemArch}
-Implementation of the scheme shown in \eqref{eq:FDS} starts by expanding the operators shown in \eqref{eq:approximations} and solving for the state at the next sample $\mathbf{u}^{n+1}$ where $\mathbf{u}$ is a vector containing the values for all grid points $l\in[0,...,N]$. It is necessary to obtain values for $\mathbf{u}$ without the bowing term first, as this needs to be solved separately using NR. The state we then obtain will be referred to as $\mathbf{u}^\text{I}$, an intermediate state which can be used to calculate the full system including the bowing term.
+Implementation of the scheme shown in \eqref{eq:FDS} starts by expanding the operators shown in \eqref{eq:approximations} and solving for the state at the next sample $\mathbf{u}^{n+1}$ where $\mathbf{u}$ is a vector containing the values for all grid points $l\in[0,...,N]$.
 
 An overview of the system architecture can be found in Figure \ref{fig:systemArch}. The three main components of the application are the Sensel controlling the application, the violin string class that performs the simulation and the main application class that moderates between these and the auditory and visual outputs. The black arrows indicate instructions that one of these components can give to another and the hollow arrows indicate data flows. Moreover, the arrows are accompanied by coloured boxes, depicting what thread the instruction or data flow is associated with and at what rate this runs. 
 
@@ -666,59 +690,158 @@ The graphics thread has the lowest priority, is denoted by the green boxes and r
 
 The thread checking and receiving data from the Sensel runs at 150 Hz and is denoted by the blue boxes. The parameters that the user interacts with (bowing force, velocity and position) are also updated at this rate.
 
-The highest priority thread is the audio thread denoted by the orange boxes and runs at 44,100 Hz. The violin string class gets updated at this rate and performs operations in the following order:
-\begin{enumerate}
-    \item Calculate $\mathbf{u}^\text{I}$ (Equation \eqref{eq:FDS} without the bowing term). 
-    \item Perform NR using $u^\text{I}_{x_\text{B}}$ and add the calculated force function to obtain $\mathbf{u}^{n+1}$. This is done using the interpolator and spreading function as shown in Figure \ref{fig:interpol}.
-    \item Update the states: switch the (C++) pointer from the vector containing the current values of $\mathbf{u}^n$ to $\mathbf{u}^{n-1}$ and do the same for $\mathbf{u}^{n+1}$ and $\mathbf{u}^n$. 
-\end{enumerate}
+The highest priority thread is the audio thread denoted by the orange boxes and runs at 44,100 Hz. The violin string class gets updated at this rate and performs operations in the order shown in Algorithm \ref{alg:calcOrder}.
+% following order:
+% \begin{enumerate}
+%     \item Calculate $f(v^n, z^n)$ in \eqref{eq:discForceFunction} using the values for $v^n$ and $z^n$ obtained using NR \eqref{eq:NRit}. 
+%     \item Calculate $\mathbf{u}^{n+1}$ using the calculated force function.
+%     \item Update the states: switch the (C++) pointer from the vector containing the current values of $\mathbf{u}$ to $\mathbf{u}^{n-1}$ and do the same for $\mathbf{u}^{n+1}$ and $\mathbf{u}$. 
+% \end{enumerate}
 
 \begin{figure}[ht]
 \centerline{\includegraphics[width=1.0\columnwidth]{systemArchitecture.pdf}}
 \caption{\label{fig:systemArch}{\it The system architecture. See Section \ref{sec:systemArch} for a thorough explanation.}}
 \end{figure}
+
+\begin{algorithm}[h]
+\setstretch{1.25}
+\fbox{\parbox{0.9\linewidth}{
+ \For{t = 1:lengthSound}{
+ calculate computable part $b^n$ (Eq. \eqref{eq:bn})\\
+ $\epsilon = 1$\\
+ $i = 0$\\
+  \While{$\epsilon <$ tol $\wedge\ i < 50 \wedge f_\text{C} > 0$}{
+    calculate..
+    \vspace{0.15cm}
+    \\
+\begin{minipage}[c]{0.3\linewidth}
+1. $z_\text{ss}(v_{(i)}^n)$ \\
+2. $\alpha(v_{(i)}^n,z_{(i)}^n)$ \\
+3. $r(v^n_{(i)}, z^n_{(i)})$ \\
+4. $g_1$, $g_2$
+\end{minipage} 
+\begin{minipage}[c]{0.6\linewidth}
+(Eq. \eqref{eq:zss} in discrete-time)\\
+    (Eq. \eqref{eq:adhesionMap} in discrete-time)\\
+    (Eq. \eqref{eq:r})\\
+    (Eqs. \eqref{eq:newtonFunction} and \eqref{eq:g2})
+\end{minipage}
+\vspace{0.01cm}
+\\
+    5.--9. Compute derivatives of 1.--4. in the same order. \\
+    10. Perform vector NR to obtain $v_{(i+1)}^n$ and $z_{(i+1)}^n$\\
+    11. Calculate $\epsilon$: $\epsilon = \norm{
+    \begin{bmatrix}
+    v_{(i+1)}^n\\
+    z_{(i+1)}^n
+    \end{bmatrix} -
+    \begin{bmatrix}
+    v_{(i)}^n\\
+    z_{(i)}^n
+    \end{bmatrix}}$\\
+    12. Increment $i$: $i = i + 1$
+  }
+  Repeat 1.--3. using the values for $v^n$ and $z^n$ from the NR iteration.
+  \vspace{0.15cm}
+  \\
+  \begin{minipage}[c]{0.4\linewidth}
+Calculate $f(v^n,z^n)$\\
+Calculate $\mathbf{u}^{n+1}$
+\end{minipage} 
+\begin{minipage}[c]{0.5\linewidth}
+(Eq. \eqref{eq:discForceFunction})\\
+(Eq. \eqref{eq:FDS} expanded) 
+\end{minipage}
+  \vspace{0.15cm}
+ \\
+$\mathbf{u}^{n-1} = \mathbf{u}^n$\\
+$\mathbf{u}^{n} = \mathbf{u}^{n+1}$
+ }
+ }}
+ \vspace{0.12cm}
+ \caption{Pseudocode showing the order of calculations.\label{alg:calcOrder}}
+\end{algorithm}
+
+\section{Results and Discussion}\label{sec:results}
+
+Figure \ref{fig:output44100} shows the outputs waveforms with $f_\text{s} =$ 44,100 Hz and $f_0 = 440$ Hz at different points along the string. The bowing parameters are $f_\text{N} =$ 5 N and $v_\text{B} =$ 0.1 m/s. The figure shows the traditional Helmholtz motion, which is the characteristic motion of a bowed string.
+
 \begin{figure}[h]
   \centering
   \begin{tikzpicture}[->,node distance=3cm,
     thick,main node/.style={circle,draw}]
 
-    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{hysteresis.eps}};
+    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{newPaperWaveform.eps}};
+    \node (A) at (0.3, 2.8) {a)};
+    \node (B) at (0.3, 1.2) {b)};
+  \end{tikzpicture}
+  \caption{\it Output waveforms of the simulation at different positions along the string where $N$ denotes the number of points of the string ($f_0 =$ 440 Hz, $f_\text{s} =$ 44,100 Hz, $f_\text{N} =$ 5 N and $v_\text{B} =$ 0.1 m/s). \label{fig:output44100}}
+\end{figure}
+
+To test whether the implementation exhibits a hysteresis loop, the force vs. relative velocity plane was visualised. In Figure \ref{fig:hysteresis}, this plot can be found for which $f_0 =$ 440 Hz and $f_\text{s} =$ 44,100 Hz have been used. The figure shows values for 500 samples around $t = 0.5f_\text{s}$. As can be seen from the figure, the hysteresis loop is achieved and is similar to the one observed in \cite{Smith2000}. The group of values around $v=0$ are due to the sticking behaviour, and the others (the loop on the left) to the slipping behaviour.
+
+\begin{figure}[h]
+  \centering
+  \begin{tikzpicture}[->,node distance=3cm,
+    thick,main node/.style={circle,draw}]
+
+    \node[anchor=south west,inner sep=0] (image) at (0,0) {\includegraphics[width=1\columnwidth]{hysteresis3.eps}};
     % \filldraw[black] (arr2B) (2,2) circle (1pt) node[anchor=center](topZ){};
     % \filldraw[black] (arr2E) (3,1.5) circle (1pt) node[anchor=center](topZ){};
     % (arr2B) edge[bend right] node [arrow] {} (arr2E);
     
-  \node (arr1B) at (2.3, 3.9) {};
-  \node (arr1E) at (1.1, 2.6) {};
-  \node (arr2B) at (2.8, 1.6) {};
-  \node (arr2E) at (5, 0.65) {};
-  \node (arr3B) at (7.7, 2.5) {};
-  \node (arr3E) at (6.9, 2.75) {};
+  \node (arr1B) at (3.8, 3.15) {};
+  \node (arr1E) at (5.7, 2.65) {};
+  \node (arr2B) at (6.8, 1.2) {};
+  \node (arr2E) at (5, 1) {};
+  \node (arr3B) at (1.4, 1.7) {};
+  \node (arr3E) at (1.5, 2.6) {};
   \path[every node/.style={font=\sffamily\small}]
 
-    (arr1B) edge[bend right = 15] node [left] {} (arr1E)
-    (arr2B) edge[bend right = 15] node [left] {} (arr2E)
-    (arr3B) edge[bend right = 50] node [left] {} (arr3E);
+    (arr1B) edge[bend left = 30] node [left] {} (arr1E)
+    (arr2B) edge[bend left = 35] node [left] {} (arr2E)
+    (arr3B) edge[bend left = 60] node [left] {} (arr3E);
     % \begin{scope}[x={(image.south east)},y={(image.north west)}]
     %     \draw[red,ultra thick,rounded corners] (0.62,0.65) rectangle (0.78,0.75);
     % \end{scope}
   \end{tikzpicture}
-  \caption{\it Hysteresis loop without noise ($s_3 = 0$) for $f_\text{N} = 1$, $v_\text{B} = 0.1$ and $x_\text{B} = 0.3$. \label{fig:hysteresis}}
+  \caption{\it Hysteresis loop showing 500 values. The values around $v=0$ are due to sticking behaviour and the loop on the left is due to slipping behaviour. \label{fig:hysteresis}}
 \end{figure}
 
-\section{Results and Discussion}\label{sec:results}
-To test whether the implementation exhibits a hysteresis loop in the force vs. relative velocity plane, \texttt{Matlab} was used. In Figure \ref{fig:hysteresis}, a plot of the force function $f(v,z)$ against the relative velocity $v$ can be found.  The following values have been used: $f_\text{N} = 1$, $v_\text{B} = 0.1$ and $x_\text{B} = 0.3$ and the noise coefficient $s_3=0$. Both $f_\text{N}$ and $v_\text{B}$ linearly ramp up to these values over the first 5,000 samples where $f_\text{s} =$ 44,100 Hz. The figure shows values for 1,000 samples around $n = 3f_\text{s}$. As can be seen from the figure, the hysteresis loop is achieved and goes in an anticlockwise direction as also observed in \cite{Smith2000}.
+Empirical investigation on the behaviour of the model showed that, for low bow forces (around 0.001 N), where a real bowed string shows a so-called multiple slipping, we encounter instability at $f_\text{s} =$ 44,100 Hz \SWcomment[as a result of the NR iteration not being able to converge.]{}. Using higher sample rates resolves this issue. At higher forces, the NR converges after ca. 1-5 iterations.
 
-For testing the speed of the algorithm, a MacBook Pro with a 2.2 GHz Intel Core i7 processor was used. Different numbers of strings were tested on to see how this affects the CPU usage. Their fundamental frequencies were set according to the common violin tuning: $f_0 = 196.0 \text{ (G3)}, 293.66 \text{ (D4)}, 440.0 \text{ (A4)} \text{ and }659.26\allowbreak \text{(E5)}$ Hz corresponding to $N = 90, 73, 52\text{ and }36$ grid points respectively. All other parameters are the same for all strings. When the total number of strings is smaller than 4, always the lowest frequency strings are used.
+For testing the speed of the algorithm, a MacBook Pro with a 2.2 GHz Intel Core i7 processor was used. The algorithm was tested using different frequencies according to the violin tuning of \SWcomment[empty strings]: $f_0 = 196.0$ (G3), $293.66$ (D4), $440.0$ (A4) and $659.26$ (E5) Hz corresponding to $N = 60$, $73$, $52$, and $36$ grid points respectively. The results can be seen in Table \ref{tab:results}. When the total number of strings is smaller than 4, always the lowest frequency strings are used.
+%This behaviour will require further simulations to be completely understood.
+% \begin{table}[h]
+%   \caption{{\it Analysis of the amount of iterations for strings with different fundamental frequencies ($f_0$) tested at different sample rates ($f_\text{s}$) for 2 seconds of simulation. The average values are given together with the maximum number of iterations observed. When the capping is used, a percentage is shown denoting the percentage of samples where this capping was used.}}
+% 	\centering
+%   \begin{tabular}{|c|c|c|c|c|c|c|}\hline
+   
+%     \multirow{ 2}{*}{\diagbox{$f_0$}{$f_\text{s}$}} & \multicolumn{2}{c|}{44,100}& \multicolumn{2}{c|}{441,000}& \multicolumn{2}{c|}{882,000}\\
+%     \cline{2-7}
+%     & avg& max &avg &max & avg & max\\
+%     \hline
+%     196.00 & 3.35 & 1.18 \% & 2.50& 0.03\% & 2.33 & 7 \\
+%     293.66 & 3.14 & 0.64\% & 2.37 & 0.007\% & 2.11 & 6\\
+%     440.00 & 2.99 & 0.27\% & 2.57 & 10& 2.15 & 6\\
+%     659.26 & 3.29 & 10 & 2.73 & 8 & 2.54 & 6 \\
+%     \hline
+%  \end{tabular}
+% 	%
+%   \label{tab:results}
+% \end{table}
+
 \begin{table}[h]
-  \caption{{\it CPU usage for different numbers of strings. The values are averages over a 10 s period both for the enabled and disabled graphics thread. All strings are bowed simultaneously (polyphonically). \SWcomment[I added "(polyphonically)" as one reviewer doubted whether the strings were bowed polyphonically, but wasn't this already clear enough?]}}
+  \caption{{\it CPU usage for different amounts of strings. The values are averages over a 10 s period both for the enabled and disabled graphics thread. All strings are bowed simultaneously (polyphonically).}}
 	\centering
   \begin{tabular}{|c|c|c|}\hline
-    Amount of strings & Graphics ($\%$) & No graphics ($\%$)\\ \hline
-    
-    1 & $45.4$ & $4.9$\\
-    2 & $52.8$ & $8.1$\\
-    3 & $53.7$ & $11.2$\\
-    4 & $54.4$ & $12.5$\\
+   
+    Amount of strings & Graphics (\%) & No graphics (\%)\\
+    \hline
+    1 & 42.8 / 50.5 & 7.0 / 14.5\\
+    2 &  & \\
+    3 &  & \\
+    4 &  & \\
     \hline
  \end{tabular}
 	%
@@ -728,15 +851,21 @@ For testing the speed of the algorithm, a MacBook Pro with a 2.2 GHz Intel Core 
 From Table \ref{tab:results} it can be observed that for one string, the CPU usage is $<5\%$ with the graphics thread disabled. This is a great result, given the fact that both the bow and the string model are computationally complex. A single string (but also more) could thus safely be used as an audio plugin in parallel to others without the user having to worry about auditory dropouts. Furthermore, it can be observed that the differences in CPU usage decrease as the number of strings increases. This can be explained by the fact that the number of points for higher strings are less than that of lower strings and thus need less computational power.
 
 \section{Conclusions}\label{sec:conclusion}
-In this paper, we presented a real-time implementation of the elasto-plastic bow model acting on a finite-difference implementation of the stiff string. With a single string we are able to keep the CPU usage down to $<5\%$ making for an efficient implementation that could be used in parallel with other virtual instruments or plugins. As in this implementation only the bowed string has been simulated, a more realistic sound can be achieved by adding an instrument body.
+In this paper, we presented an implementation of an elasto-plastic friction model with applications to a  bow exciting a string, discretised using a finite-difference approach. 
+
+With a single string we are able to keep the CPU usage down to $<5\%$ making for an efficient implementation that could be used in parallel with other virtual instruments or plugins.
+
+Future work includes parameter design and including an instrument body for more realistic sounding results, as well as listening tests to verify the perceivable differences between simpler friction models versus the elasto-plastic model.
+
+
 
 \section{Acknowledgments}
-Many thanks to the anonymous reviewers for giving valuable input to this work. This work is supported by NordForsk's Nordic
+Many thanks to the anonymous reviewers for giving their valuable input. This work is supported by NordForsk's Nordic
 University Hub Nordic Sound and Music Computing Network
 NordicSMC, project number 86892.
 
 %\newpage
-\nocite{*}
+%\nocite{*}
 \begin{footnotesize}
 \bibliographystyle{IEEEbib}
 \bibliography{DAFx19_tmpl} 
